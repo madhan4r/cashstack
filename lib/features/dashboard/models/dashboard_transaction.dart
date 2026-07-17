@@ -1,4 +1,4 @@
-import 'transaction_kind.dart';
+import '../../../shared/models/transaction_kind.dart';
 
 /// One row of the dashboard's "recent transactions" list. Mirrors the
 /// backend's `DashboardTransactionDto`.

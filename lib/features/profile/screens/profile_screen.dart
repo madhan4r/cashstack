@@ -22,13 +22,18 @@ class ProfileScreen extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            CircleAvatar(
-              radius: 36,
-              backgroundColor: context.colors.primaryContainer,
-              child: Icon(
-                Icons.person_outline,
-                size: 36,
-                color: context.colors.onPrimaryContainer,
+            Center(
+              child: Hero(
+                tag: 'profile-avatar',
+                child: CircleAvatar(
+                  radius: 36,
+                  backgroundColor: context.colors.primaryContainer,
+                  child: Icon(
+                    Icons.person_outline,
+                    size: 36,
+                    color: context.colors.onPrimaryContainer,
+                  ),
+                ),
               ),
             ),
             const SizedBox(height: 16),

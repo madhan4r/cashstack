@@ -8,10 +8,11 @@ import '../features/auth/screens/forgot_password_screen.dart';
 import '../features/auth/screens/login_screen.dart';
 import '../features/auth/screens/register_screen.dart';
 import '../features/auth/screens/reset_password_screen.dart';
-import '../features/home/screens/home_screen.dart';
+import '../features/dashboard/screens/dashboard_screen.dart';
 import '../features/profile/screens/profile_screen.dart';
 import '../features/settings/screens/settings_screen.dart';
 import '../features/splash/screens/splash_screen.dart';
+import '../features/transactions/screens/transactions_screen.dart';
 import 'app_routes.dart';
 import 'main_shell.dart';
 
@@ -82,6 +83,10 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           initialToken: state.uri.queryParameters['token'],
         ),
       ),
+      GoRoute(
+        path: AppRoutes.transactions,
+        builder: (context, state) => const TransactionsScreen(),
+      ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) =>
             MainShell(navigationShell: navigationShell),
@@ -90,7 +95,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: AppRoutes.home,
-                builder: (context, state) => const HomeScreen(),
+                builder: (context, state) => const DashboardScreen(),
               ),
             ],
           ),
