@@ -146,8 +146,7 @@ class _DashboardContent extends StatelessWidget {
                   QuickActionItem(
                     label: 'Reports',
                     icon: Icons.bar_chart_rounded,
-                    onTap: () =>
-                        AppToast.show(context, 'Reports are coming soon'),
+                    onTap: () => context.push(AppRoutes.reports),
                   ),
                 ],
               ),

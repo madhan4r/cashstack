@@ -11,6 +11,8 @@ import '../features/auth/screens/reset_password_screen.dart';
 import '../features/accounts/screens/screens.dart';
 import '../features/categories/screens/screens.dart';
 import '../features/dashboard/screens/dashboard_screen.dart';
+import '../features/recurring/screens/screens.dart';
+import '../features/reports/screens/screens.dart';
 import '../features/profile/screens/profile_screen.dart';
 import '../features/settings/screens/settings_screen.dart';
 import '../features/splash/screens/splash_screen.dart';
@@ -144,6 +146,23 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.categoryDetailsPattern,
         builder: (context, state) =>
             CategoryDetailsScreen(categoryId: state.pathParameters['id']!),
+      ),
+      GoRoute(
+        path: AppRoutes.reports,
+        builder: (context, state) => const ReportsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.recurring,
+        builder: (context, state) => const RecurringListScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.addRecurring,
+        builder: (context, state) => const RecurringFormScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.editRecurringPattern,
+        builder: (context, state) =>
+            RecurringFormScreen(recurringId: state.pathParameters['id']),
       ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) =>

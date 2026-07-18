@@ -37,4 +37,12 @@ class AppRoutes {
 
   static String editCategory(String categoryId) => '/categories/$categoryId/edit';
   static const String editCategoryPattern = '/categories/:id/edit';
+
+  static const String reports = '/reports';
+
+  static const String recurring = '/recurring';
+  static const String addRecurring = '/recurring/new';
+
+  static String editRecurring(String recurringId) => '/recurring/$recurringId/edit';
+  static const String editRecurringPattern = '/recurring/:id/edit';
 }

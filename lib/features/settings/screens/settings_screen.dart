@@ -27,6 +27,12 @@ class SettingsScreen extends StatelessWidget {
             subtitle: 'Manage income and expense categories',
             onTap: () => context.push(AppRoutes.categories),
           ),
+          AppListTile(
+            leading: const Icon(Icons.event_repeat_outlined),
+            title: 'Recurring Transactions',
+            subtitle: 'Automate bills, subscriptions, and salary',
+            onTap: () => context.push(AppRoutes.recurring),
+          ),
           const AppListTile(
             leading: Icon(Icons.dark_mode_outlined),
             title: 'Appearance',
