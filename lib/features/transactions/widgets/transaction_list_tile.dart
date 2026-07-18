@@ -55,8 +55,7 @@ class TransactionListTile extends StatelessWidget {
     final metaParts = [
       if (account != null) account!.name,
       transaction.transactionDate.toRelativeLabel(),
-      if (transaction.paymentMethod != null)
-        _formatPaymentMethod(transaction.paymentMethod!),
+      if (transaction.paymentMethod != null) transaction.paymentMethod!.label,
     ];
 
     return AppCard(
@@ -122,15 +121,5 @@ class TransactionListTile extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  String _formatPaymentMethod(String method) {
-    return switch (method) {
-      'CASH' => 'Cash',
-      'CARD' => 'Card',
-      'UPI' => 'UPI',
-      'BANK_TRANSFER' => 'Bank transfer',
-      _ => 'Other',
-    };
   }
 }

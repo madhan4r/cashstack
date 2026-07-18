@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 
 import '../../../shared/models/transaction_kind.dart';
+import 'payment_method.dart';
 
 /// A single transaction, as returned by `GET /transactions`. Mirrors the
 /// backend's `TransactionResponseDto` — note it carries raw
@@ -16,7 +17,7 @@ class Transaction extends Equatable {
   final String? fromAccountId;
   final String? toAccountId;
   final String? notes;
-  final String? paymentMethod;
+  final PaymentMethod? paymentMethod;
   final DateTime transactionDate;
   final List<String> tags;
 
@@ -35,6 +36,7 @@ class Transaction extends Equatable {
   });
 
   factory Transaction.fromJson(Map<String, dynamic> json) {
+    final paymentMethodJson = json['paymentMethod'] as String?;
     return Transaction(
       id: json['id'] as String,
       amount: (json['amount'] as num).toDouble(),
@@ -44,7 +46,9 @@ class Transaction extends Equatable {
       fromAccountId: json['fromAccountId'] as String?,
       toAccountId: json['toAccountId'] as String?,
       notes: json['notes'] as String?,
-      paymentMethod: json['paymentMethod'] as String?,
+      paymentMethod: paymentMethodJson == null
+          ? null
+          : PaymentMethod.fromJson(paymentMethodJson),
       transactionDate: DateTime.parse(json['transactionDate'] as String),
       tags: (json['tags'] as List<dynamic>? ?? const [])
           .map((e) => e as String)

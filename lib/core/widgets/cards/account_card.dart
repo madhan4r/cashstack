@@ -16,6 +16,10 @@ class AccountCard extends StatelessWidget {
   final Color? color;
   final VoidCallback? onTap;
 
+  /// Optional trailing line below the balance — e.g. "Updated 2h ago".
+  /// Purely additive; omit for the original layout.
+  final String? footer;
+
   const AccountCard({
     super.key,
     required this.name,
@@ -25,6 +29,7 @@ class AccountCard extends StatelessWidget {
     this.icon = Icons.account_balance_wallet_outlined,
     this.color,
     this.onTap,
+    this.footer,
   });
 
   @override
@@ -76,6 +81,15 @@ class AccountCard extends StatelessWidget {
               fontWeight: FontWeight.w700,
             ),
           ),
+          if (footer != null) ...[
+            const SizedBox(height: 6),
+            Text(
+              footer!,
+              style: context.textStyles.bodySmall?.copyWith(
+                color: context.colors.onSurfaceVariant,
+              ),
+            ),
+          ],
         ],
       ),
     );

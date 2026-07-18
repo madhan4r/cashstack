@@ -35,7 +35,7 @@ class CurrencyTextField extends StatelessWidget {
       validator: validator,
       enabled: enabled,
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
-      inputFormatters: [_ThousandsSeparatorFormatter()],
+      inputFormatters: [ThousandsSeparatorFormatter()],
       prefixIcon: Padding(
         padding: const EdgeInsets.only(left: 4),
         child: Center(
@@ -60,7 +60,7 @@ class CurrencyTextField extends StatelessWidget {
 /// the cursor at the end (simple, predictable behavior for a numeric-only
 /// field — full caret-position preservation isn't needed here since amounts
 /// are short and typed left-to-right).
-class _ThousandsSeparatorFormatter extends TextInputFormatter {
+class ThousandsSeparatorFormatter extends TextInputFormatter {
   static final _formatter = NumberFormat.decimalPattern();
 
   @override

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/widgets/cards/app_list_tile.dart';
 import '../../../core/widgets/navigation/app_bar.dart';
+import '../../../routes/app_routes.dart';
 
 /// Placeholder settings screen.
 class SettingsScreen extends StatelessWidget {
@@ -12,18 +14,30 @@ class SettingsScreen extends StatelessWidget {
     return Scaffold(
       appBar: const CashStackAppBar(title: 'Settings', showBackButton: false),
       body: ListView(
-        children: const [
+        children: [
           AppListTile(
+            leading: const Icon(Icons.account_balance_wallet_outlined),
+            title: 'Accounts',
+            subtitle: 'Manage your bank, cash, and card accounts',
+            onTap: () => context.push(AppRoutes.accounts),
+          ),
+          AppListTile(
+            leading: const Icon(Icons.category_outlined),
+            title: 'Categories',
+            subtitle: 'Manage income and expense categories',
+            onTap: () => context.push(AppRoutes.categories),
+          ),
+          const AppListTile(
             leading: Icon(Icons.dark_mode_outlined),
             title: 'Appearance',
             subtitle: 'Coming soon',
           ),
-          AppListTile(
+          const AppListTile(
             leading: Icon(Icons.notifications_outlined),
             title: 'Notifications',
             subtitle: 'Coming soon',
           ),
-          AppListTile(
+          const AppListTile(
             leading: Icon(Icons.language_outlined),
             title: 'Language',
             subtitle: 'English',

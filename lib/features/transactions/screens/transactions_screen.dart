@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/error/failure.dart';
-import '../../../core/widgets/feedback/app_toast.dart';
 import '../../../core/widgets/feedback/error_state.dart';
 import '../../../core/widgets/misc/app_fab.dart';
 import '../../../core/widgets/misc/scrollable_single_child.dart';
 import '../../../core/widgets/navigation/app_bar.dart';
+import '../../../routes/app_routes.dart';
 import '../../../services/snackbar_service.dart';
 import '../models/transaction.dart';
 import '../models/transaction_sort_option.dart';
@@ -46,7 +47,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
   }
 
   void _onTapTransaction(Transaction transaction) {
-    AppToast.show(context, 'Transaction details are coming soon');
+    context.push(AppRoutes.editTransaction(transaction.id));
   }
 
   @override
@@ -114,7 +115,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                       }
                     : null,
                 onAddTransaction: () =>
-                    AppToast.show(context, 'Add Transaction is coming soon'),
+                    context.push(AppRoutes.addTransaction),
               ),
             ),
           _ => referenceDataAsync.when(
@@ -139,7 +140,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
         },
       ),
       floatingActionButton: AppFab(
-        onPressed: () => AppToast.show(context, 'Add Transaction is coming soon'),
+        onPressed: () => context.push(AppRoutes.addTransaction),
       ),
     );
   }

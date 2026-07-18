@@ -43,6 +43,29 @@ class AppColors {
     shimmerHighlight: _shimmerHighlightLight,
   );
 
+  /// Predefined swatches offered by any user-facing color picker (e.g. the
+  /// category color picker) — deliberately a closed palette, no custom hex
+  /// input, so every user-chosen color still looks intentional against the
+  /// rest of the UI. A superset of the backend's default-category colors.
+  static const List<Color> categoryPalette = [
+    Color(0xFF22C55E),
+    Color(0xFF16A34A),
+    Color(0xFF15803D),
+    Color(0xFF4ADE80),
+    Color(0xFFF97316),
+    Color(0xFFF59E0B),
+    Color(0xFFEC4899),
+    Color(0xFFEF4444),
+    Color(0xFF8B5CF6),
+    Color(0xFF06B6D4),
+    Color(0xFF64748B),
+    Color(0xFF3B82F6),
+    Color(0xFF14B8A6),
+    Color(0xFFA855F7),
+    Color(0xFFF43F5E),
+    Color(0xFFEAB308),
+  ];
+
   static const AppSemanticColors dark = AppSemanticColors(
     success: _successDark,
     danger: _dangerDark,

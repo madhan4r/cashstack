@@ -85,8 +85,7 @@ class _EmptyDashboard extends StatelessWidget {
               description:
                   'Add your first transaction to see your balance, spending, and trends here.',
               actionLabel: 'Add First Transaction',
-              onAction: () =>
-                  AppToast.show(context, 'Transactions are coming soon'),
+              onAction: () => context.push(AppRoutes.addTransaction),
             ),
           ],
         ),
@@ -131,21 +130,18 @@ class _DashboardContent extends StatelessWidget {
                     label: 'Add Expense',
                     icon: Icons.remove_circle_outline_rounded,
                     color: context.semanticColors.expense,
-                    onTap: () =>
-                        AppToast.show(context, 'Add Expense is coming soon'),
+                    onTap: () => context.push('${AppRoutes.addTransaction}?type=EXPENSE'),
                   ),
                   QuickActionItem(
                     label: 'Add Income',
                     icon: Icons.add_circle_outline_rounded,
                     color: context.semanticColors.income,
-                    onTap: () =>
-                        AppToast.show(context, 'Add Income is coming soon'),
+                    onTap: () => context.push('${AppRoutes.addTransaction}?type=INCOME'),
                   ),
                   QuickActionItem(
                     label: 'Transfer',
                     icon: Icons.swap_horiz_rounded,
-                    onTap: () =>
-                        AppToast.show(context, 'Transfer is coming soon'),
+                    onTap: () => context.push('${AppRoutes.addTransaction}?type=TRANSFER'),
                   ),
                   QuickActionItem(
                     label: 'Reports',
