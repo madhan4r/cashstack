@@ -12,6 +12,7 @@ import '../../../core/widgets/misc/scrollable_single_child.dart';
 import '../../../core/widgets/navigation/app_bar.dart';
 import '../../../core/utils/category_icons.dart';
 import '../../../services/snackbar_service.dart';
+import '../../auth/providers/preferred_currency_provider.dart';
 import '../../categories/models/category_selector_item.dart';
 import '../../categories/models/category_type.dart';
 import '../../categories/providers/categories_list_controller.dart';
@@ -125,7 +126,14 @@ class _RecurringFormScreenState extends ConsumerState<RecurringFormScreen> {
     final state = ref.watch(recurringFormControllerProvider(widget.recurringId));
 
     ref.listen(recurringFormControllerProvider(widget.recurringId), (previous, next) {
-      if (!next.isLoadingInitial && next.loadError == null) {
+      // Only seed from state when the existing record's async load just
+      // finished (Edit mode) — not on every field-level state change (e.g.
+      // picking a category), which would otherwise stomp on whatever the
+      // user already typed into the name/amount fields (those aren't
+      // synced to state live; they're read directly on save).
+      final justFinishedLoading =
+          (previous?.isLoadingInitial ?? false) && !next.isLoadingInitial;
+      if (!_seeded && justFinishedLoading && next.loadError == null) {
         _seedControllers(next);
       }
     });
@@ -196,6 +204,7 @@ class _FormContent extends ConsumerWidget {
     final controller = ref.read(recurringFormControllerProvider(recurringId).notifier);
     final categories = ref.watch(activeCategoriesByTypeProvider(_categoryType));
     final referenceDataAsync = ref.watch(referenceDataProvider);
+    final currencySymbol = ref.watch(preferredCurrencySymbolProvider);
     final accounts = switch (referenceDataAsync) {
       AsyncData(:final value) => value.accounts,
       _ => const <AccountRef>[],
@@ -220,6 +229,7 @@ class _FormContent extends ConsumerWidget {
             RecurringFormBody(
               nameController: nameController,
               amountController: amountController,
+              currencySymbol: currencySymbol,
               notesController: notesController,
               customIntervalController: customIntervalController,
               type: state.type,

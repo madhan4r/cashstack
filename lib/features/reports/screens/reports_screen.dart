@@ -9,6 +9,7 @@ import '../../../core/widgets/misc/scrollable_single_child.dart';
 import '../../../core/widgets/navigation/app_bar.dart';
 import '../../../routes/app_routes.dart';
 import '../../../services/snackbar_service.dart';
+import '../../auth/providers/preferred_currency_provider.dart';
 import '../../dashboard/widgets/staggered_entrance.dart';
 import '../../transactions/models/category_ref.dart';
 import '../../transactions/models/transaction_filter.dart';
@@ -100,6 +101,7 @@ class ReportsScreen extends ConsumerWidget {
     final filter = ref.watch(reportsFilterProvider);
     final reportsAsync = ref.watch(reportsControllerProvider);
     final referenceDataAsync = ref.watch(referenceDataProvider);
+    final currencySymbol = ref.watch(preferredCurrencySymbolProvider);
 
     return Scaffold(
       appBar: CashStackAppBar(
@@ -153,6 +155,7 @@ class ReportsScreen extends ConsumerWidget {
                   return _ReportsContent(
                     data: data,
                     filter: filter,
+                    currencySymbol: currencySymbol,
                     categoriesById: switch (referenceDataAsync) {
                       AsyncData(:final value) => value.categoriesById,
                       _ => const {},
@@ -181,6 +184,7 @@ class ReportsScreen extends ConsumerWidget {
 class _ReportsContent extends StatelessWidget {
   final ReportsData data;
   final ReportFilter filter;
+  final String currencySymbol;
   final Map<String, CategoryRef> categoriesById;
   final ValueChanged<String> onTapCategorySegment;
   final ValueChanged<String> onTapAccount;
@@ -188,6 +192,7 @@ class _ReportsContent extends StatelessWidget {
   const _ReportsContent({
     required this.data,
     required this.filter,
+    required this.currencySymbol,
     required this.categoriesById,
     required this.onTapCategorySegment,
     required this.onTapAccount,
@@ -208,7 +213,9 @@ class _ReportsContent extends StatelessWidget {
       padding: const EdgeInsets.all(AppSpacing.md),
       physics: const AlwaysScrollableScrollPhysics(),
       children: [
-        StaggeredEntrance(child: ReportSummaryGrid(summary: data.summary)),
+        StaggeredEntrance(
+          child: ReportSummaryGrid(summary: data.summary, currencySymbol: currencySymbol),
+        ),
         const SizedBox(height: AppSpacing.xl),
         StaggeredEntrance(
           delay: const Duration(milliseconds: 60),
@@ -219,6 +226,7 @@ class _ReportsContent extends StatelessWidget {
               const SizedBox(height: AppSpacing.sm),
               PieChartCard(
                 items: data.categoryBreakdown,
+                currencySymbol: currencySymbol,
                 onTapSegment: (item) => onTapCategorySegment(item.categoryId),
               ),
             ],
@@ -232,7 +240,11 @@ class _ReportsContent extends StatelessWidget {
             children: [
               const ReportSectionHeader(title: 'Income vs Expense'),
               const SizedBox(height: AppSpacing.sm),
-              BarChartCard(income: data.summary.totalIncome, expense: data.summary.totalExpense),
+              BarChartCard(
+                income: data.summary.totalIncome,
+                expense: data.summary.totalExpense,
+                currencySymbol: currencySymbol,
+              ),
             ],
           ),
         ),
@@ -256,7 +268,7 @@ class _ReportsContent extends StatelessWidget {
             children: [
               const ReportSectionHeader(title: 'Daily Spending'),
               const SizedBox(height: AppSpacing.sm),
-              ColumnChartCard(days: data.dailySpending),
+              ColumnChartCard(days: data.dailySpending, currencySymbol: currencySymbol),
             ],
           ),
         ),
@@ -272,6 +284,7 @@ class _ReportsContent extends StatelessWidget {
                 items: data.categoryBreakdown,
                 iconOf: _iconOf,
                 colorOf: _colorOf,
+                currencySymbol: currencySymbol,
                 onTap: (item) => onTapCategorySegment(item.categoryId),
               ),
             ],
@@ -287,6 +300,7 @@ class _ReportsContent extends StatelessWidget {
               const SizedBox(height: AppSpacing.sm),
               AccountBreakdownList(
                 items: data.accountBreakdown,
+                currencySymbol: currencySymbol,
                 onTap: (item) => onTapAccount(item.accountId),
               ),
             ],
@@ -300,7 +314,7 @@ class _ReportsContent extends StatelessWidget {
             children: [
               const ReportSectionHeader(title: 'Top Insights'),
               const SizedBox(height: AppSpacing.sm),
-              InsightsGrid(data: data),
+              InsightsGrid(data: data, currencySymbol: currencySymbol),
             ],
           ),
         ),

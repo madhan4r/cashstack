@@ -8,6 +8,7 @@ import '../../../core/error/result.dart';
 import '../models/category.dart';
 import '../models/category_form_data.dart';
 import '../models/category_type.dart';
+import '../../transactions/providers/reference_data_provider.dart';
 import '../repositories/categories_repository.dart';
 import 'categories_list_controller.dart';
 import 'category_form_state.dart';
@@ -91,6 +92,7 @@ class CategoryFormController extends Notifier<CategoryFormState> {
           : await repository.createCategory(data);
 
       ref.read(categoriesListControllerProvider.notifier).upsertLocal(saved);
+      ref.invalidate(referenceDataProvider);
       state = state.copyWith(isSubmitting: false);
       return Result.ok(saved);
     } catch (error) {
@@ -110,6 +112,7 @@ class CategoryFormController extends Notifier<CategoryFormState> {
     try {
       await repository.deleteCategory(id);
       ref.read(categoriesListControllerProvider.notifier).removeLocal(id);
+      ref.invalidate(referenceDataProvider);
       state = state.copyWith(isDeleting: false);
       return const Result.ok(null);
     } catch (error) {
@@ -132,6 +135,7 @@ class CategoryFormController extends Notifier<CategoryFormState> {
           : await repository.archiveCategory(id);
 
       ref.read(categoriesListControllerProvider.notifier).upsertLocal(updated);
+      ref.invalidate(referenceDataProvider);
       state = state.copyWith(
         isTogglingArchive: false,
         isArchived: updated.isArchived,

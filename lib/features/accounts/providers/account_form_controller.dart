@@ -8,6 +8,7 @@ import '../../../core/error/result.dart';
 import '../models/account.dart';
 import '../models/account_form_data.dart';
 import '../models/account_type.dart';
+import '../../transactions/providers/reference_data_provider.dart';
 import '../repositories/accounts_repository.dart';
 import 'accounts_list_controller.dart';
 import 'account_form_state.dart';
@@ -91,14 +92,18 @@ class AccountFormController extends Notifier<AccountFormState> {
           ? await repository.updateAccount(state.accountId!, data)
           : await repository.createAccount(data);
 
-      // Create/update responses don't include a fresh `balance` — for an
-      // edit, keep displaying the account's actual known balance instead
-      // of the response's opening-balance fallback.
-      final result = state.isEditMode && state.knownBalance != null
-          ? saved.copyWith(balance: state.knownBalance)
+      // The update response doesn't include a computed `balance` (it falls
+      // back to the raw opening balance), which would be wrong for any
+      // account that already has transactions against it — e.g. editing
+      // the name would appear to reset the balance to the opening amount.
+      // Re-fetch the single account, which does merge the true computed
+      // balance, same as the list/details screens use.
+      final result = state.isEditMode
+          ? await repository.getAccount(saved.id)
           : saved;
 
       ref.read(accountsListControllerProvider.notifier).upsertLocal(result);
+      ref.invalidate(referenceDataProvider);
       state = state.copyWith(isSubmitting: false, knownBalance: result.balance);
       return Result.ok(result);
     } catch (error) {
@@ -118,6 +123,7 @@ class AccountFormController extends Notifier<AccountFormState> {
     try {
       await repository.deleteAccount(id);
       ref.read(accountsListControllerProvider.notifier).removeLocal(id);
+      ref.invalidate(referenceDataProvider);
       state = state.copyWith(isDeleting: false);
       return const Result.ok(null);
     } catch (error) {
@@ -143,6 +149,7 @@ class AccountFormController extends Notifier<AccountFormState> {
           : updated;
 
       ref.read(accountsListControllerProvider.notifier).upsertLocal(result);
+      ref.invalidate(referenceDataProvider);
       state = state.copyWith(
         isTogglingArchive: false,
         isArchived: result.isArchived,

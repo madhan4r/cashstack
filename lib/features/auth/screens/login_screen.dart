@@ -24,6 +24,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isSubmitting = false;
+  bool _rememberMe = true;
 
   @override
   void dispose() {
@@ -42,6 +43,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         .login(
           email: _emailController.text.trim(),
           password: _passwordController.text,
+          rememberMe: _rememberMe,
         );
 
     if (!mounted) return;
@@ -85,12 +87,28 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   validator: Validators.password,
                   onFieldSubmitted: (_) => _submit(),
                 ),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: AppTextButton(
-                    label: 'Forgot password?',
-                    onPressed: () => context.push(AppRoutes.forgotPassword),
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    InkWell(
+                      onTap: () => setState(() => _rememberMe = !_rememberMe),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Checkbox(
+                            value: _rememberMe,
+                            onChanged: (value) =>
+                                setState(() => _rememberMe = value ?? true),
+                          ),
+                          const Text('Remember me'),
+                        ],
+                      ),
+                    ),
+                    AppTextButton(
+                      label: 'Forgot password?',
+                      onPressed: () => context.push(AppRoutes.forgotPassword),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 8),
                 AppPrimaryButton(

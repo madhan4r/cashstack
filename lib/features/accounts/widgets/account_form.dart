@@ -6,7 +6,7 @@ import '../../../core/widgets/inputs/app_dropdown.dart';
 import '../../../core/widgets/inputs/app_text_field.dart';
 import '../../../core/widgets/inputs/currency_text_field.dart';
 import '../models/account_type.dart';
-import '../models/currency.dart';
+import '../../../core/utils/currency.dart';
 import 'account_type_chip.dart';
 
 /// The Add/Edit Account form fields: name, type, currency, opening

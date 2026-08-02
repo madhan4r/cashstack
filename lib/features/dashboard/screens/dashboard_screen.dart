@@ -12,6 +12,7 @@ import '../../../core/widgets/misc/scrollable_single_child.dart';
 import '../../../core/widgets/misc/section_header.dart';
 import '../../../routes/app_routes.dart';
 import '../../auth/providers/auth_controller.dart';
+import '../../auth/providers/preferred_currency_provider.dart';
 import '../models/dashboard_data.dart';
 import '../providers/dashboard_controller.dart';
 import '../widgets/analytics_card.dart';
@@ -34,6 +35,7 @@ class DashboardScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final dashboardAsync = ref.watch(dashboardControllerProvider);
     final userName = ref.watch(authControllerProvider).user?.fullName;
+    final currencySymbol = ref.watch(preferredCurrencySymbolProvider);
 
     return Scaffold(
       body: SafeArea(
@@ -48,6 +50,7 @@ class DashboardScreen extends ConsumerWidget {
                     : _DashboardContent(
                         data: value,
                         header: DashboardHeader(fullName: userName),
+                        currencySymbol: currencySymbol,
                       ),
                 AsyncError(:final error) => ScrollableSingleChild(
                     child: ErrorState.fromFailure(
@@ -97,8 +100,13 @@ class _EmptyDashboard extends StatelessWidget {
 class _DashboardContent extends StatelessWidget {
   final DashboardData data;
   final Widget header;
+  final String currencySymbol;
 
-  const _DashboardContent({required this.data, required this.header});
+  const _DashboardContent({
+    required this.data,
+    required this.header,
+    required this.currencySymbol,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -114,6 +122,7 @@ class _DashboardContent extends StatelessWidget {
             monthlyIncome: data.monthlyIncome,
             monthlyExpense: data.monthlyExpense,
             monthlySavings: data.monthlySavings,
+            currencySymbol: currencySymbol,
           ),
         ),
         _sectionGap,
@@ -162,7 +171,10 @@ class _DashboardContent extends StatelessWidget {
               children: [
                 const SectionHeader(title: 'Top Spending Categories'),
                 const SizedBox(height: AppSpacing.md),
-                AnalyticsCard(categories: data.expenseByCategory.take(5).toList()),
+                AnalyticsCard(
+                  categories: data.expenseByCategory.take(5).toList(),
+                  currencySymbol: currencySymbol,
+                ),
               ],
             ),
           ),
@@ -190,6 +202,7 @@ class _DashboardContent extends StatelessWidget {
               BudgetSummaryCard(
                 budget: null,
                 spent: data.monthlyExpense,
+                currencySymbol: currencySymbol,
                 onSetBudget: () =>
                     AppToast.show(context, 'Budgets are coming soon'),
               ),
@@ -208,7 +221,10 @@ class _DashboardContent extends StatelessWidget {
                 onAction: () => context.push(AppRoutes.transactions),
               ),
               for (final transaction in data.recentTransactions)
-                DashboardTransactionTile(transaction: transaction),
+                DashboardTransactionTile(
+                  transaction: transaction,
+                  currencySymbol: currencySymbol,
+                ),
             ],
           ),
         ),

@@ -3,7 +3,12 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/error/exception_mapper.dart';
+import '../../../core/error/failure.dart';
+import '../../../core/error/result.dart';
+import '../../transactions/providers/reference_data_provider.dart';
+import '../models/category.dart';
 import '../repositories/categories_repository.dart';
+import 'categories_list_controller.dart';
 import 'category_details_state.dart';
 
 /// Drives the Category Detail screen's header/stats — keyed by
@@ -37,6 +42,28 @@ class CategoryDetailsController extends Notifier<CategoryDetailsState> {
   }
 
   Future<void> refresh() => _load();
+
+  Future<Result<Category>> toggleArchive() async {
+    final current = state.category;
+    if (current == null) return const Result.err(UnknownFailure());
+
+    state = state.copyWith(isTogglingArchive: true);
+    final repository = ref.read(categoriesRepositoryProvider);
+
+    try {
+      final updated = current.isArchived
+          ? await repository.unarchiveCategory(categoryId)
+          : await repository.archiveCategory(categoryId);
+
+      state = state.copyWith(category: updated, isTogglingArchive: false);
+      ref.read(categoriesListControllerProvider.notifier).upsertLocal(updated);
+      ref.invalidate(referenceDataProvider);
+      return Result.ok(updated);
+    } catch (error) {
+      state = state.copyWith(isTogglingArchive: false);
+      return Result.err(mapExceptionToFailure(error));
+    }
+  }
 }
 
 final categoryDetailsControllerProvider = NotifierProvider.autoDispose

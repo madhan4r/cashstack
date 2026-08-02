@@ -1,7 +1,8 @@
 /// The backend stores currency as a free-text ISO 4217 code with no
 /// canonical list of its own (`@Length(3,3)` is the only validation) — this
-/// is the client-side list offered in the currency picker, plus a symbol
-/// lookup used anywhere a balance is displayed.
+/// is the client-side list offered in currency pickers (account currency,
+/// preferred app currency), plus a symbol lookup used anywhere a balance is
+/// displayed.
 class CurrencyOption {
   final String code;
   final String name;

@@ -10,6 +10,7 @@ import '../../../core/widgets/misc/scrollable_single_child.dart';
 import '../../../core/widgets/navigation/app_bar.dart';
 import '../../../routes/app_routes.dart';
 import '../../../services/snackbar_service.dart';
+import '../../auth/providers/preferred_currency_provider.dart';
 import '../../transactions/providers/reference_data_provider.dart';
 import '../models/occurrence_status.dart';
 import '../models/recurrence_frequency.dart';
@@ -90,6 +91,7 @@ class _SchedulesTab extends ConsumerWidget {
     final listState = ref.watch(recurringListControllerProvider);
     final filter = ref.watch(recurringFilterProvider);
     final referenceDataAsync = ref.watch(referenceDataProvider);
+    final currencySymbol = ref.watch(preferredCurrencySymbolProvider);
     final hasActiveFilters = filter.status != null || filter.frequency != null;
 
     return Column(
@@ -140,6 +142,7 @@ class _SchedulesTab extends ConsumerWidget {
                         categoryIcon: category?.icon,
                         categoryColor: category?.color,
                         accountName: account?.name,
+                        currencySymbol: currencySymbol,
                         onTap: () => context.push(AppRoutes.editRecurring(r.id)),
                         onPause: () => _handlePause(context, ref, r),
                         onResume: () => _handleResume(context, ref, r),
@@ -221,6 +224,7 @@ class _UpcomingTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final upcomingAsync = ref.watch(upcomingOccurrencesProvider(30));
+    final currencySymbol = ref.watch(preferredCurrencySymbolProvider);
 
     return RefreshIndicator(
       onRefresh: () async => ref.invalidate(upcomingOccurrencesProvider(30)),
@@ -228,7 +232,7 @@ class _UpcomingTab extends ConsumerWidget {
         data: (entries) => ScrollableSingleChild(
           child: Padding(
             padding: const EdgeInsets.all(AppSpacing.md),
-            child: SchedulePreview(entries: entries),
+            child: SchedulePreview(entries: entries, currencySymbol: currencySymbol),
           ),
         ),
         loading: () => const ScrollableSingleChild(child: RecurringSkeleton()),
@@ -289,6 +293,7 @@ class _HistoryList extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(historyControllerProvider(status));
+    final currencySymbol = ref.watch(preferredCurrencySymbolProvider);
 
     return RefreshIndicator(
       onRefresh: () => ref.read(historyControllerProvider(status).notifier).refresh(),
@@ -325,7 +330,10 @@ class _HistoryList extends ConsumerWidget {
               physics: const AlwaysScrollableScrollPhysics(),
               itemCount: state.items.length,
               separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.sm),
-              itemBuilder: (context, index) => HistoryTile(occurrence: state.items[index]),
+              itemBuilder: (context, index) => HistoryTile(
+                occurrence: state.items[index],
+                currencySymbol: currencySymbol,
+              ),
             ),
           ),
       },

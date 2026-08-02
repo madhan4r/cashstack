@@ -69,6 +69,36 @@ class AuthApiService {
     }
   }
 
+  Future<UserDto> updateProfile({String? fullName, String? preferredCurrency}) async {
+    try {
+      final response = await _dio.patch<Map<String, dynamic>>(
+        '/users/me',
+        data: {'fullName': ?fullName, 'preferredCurrency': ?preferredCurrency},
+      );
+      final apiResponse = ApiResponse.fromJson(
+        response.data!,
+        (json) => UserDto.fromJson(json as Map<String, dynamic>),
+      );
+      return apiResponse.data;
+    } on DioException catch (e) {
+      throw e.appException;
+    }
+  }
+
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    try {
+      await _dio.patch<Map<String, dynamic>>(
+        '/auth/change-password',
+        data: {'currentPassword': currentPassword, 'newPassword': newPassword},
+      );
+    } on DioException catch (e) {
+      throw e.appException;
+    }
+  }
+
   Future<AuthResponseDto> _postAuth(
     String path,
     Map<String, dynamic> body,

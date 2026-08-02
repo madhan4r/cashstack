@@ -4,7 +4,7 @@ import '../../../core/extensions/date_extensions.dart';
 import '../../../core/utils/color_utils.dart';
 import '../../../core/widgets/cards/account_card.dart';
 import '../models/account.dart';
-import '../models/currency.dart';
+import '../../../core/utils/currency.dart';
 
 /// A single row on the Accounts list — thin adapter from the domain
 /// [Account] model onto the shared [AccountCard], resolving its type

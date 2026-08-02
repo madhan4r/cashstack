@@ -14,11 +14,13 @@ import '../models/dashboard_transaction.dart';
 /// styling for the transaction's [TransactionKind].
 class DashboardTransactionTile extends StatelessWidget {
   final DashboardTransaction transaction;
+  final String currencySymbol;
   final VoidCallback? onTap;
 
   const DashboardTransactionTile({
     super.key,
     required this.transaction,
+    this.currencySymbol = '\$',
     this.onTap,
   });
 
@@ -37,6 +39,7 @@ class DashboardTransactionTile extends StatelessWidget {
       title: title,
       subtitle: subtitleParts.join(' • '),
       amount: transaction.amount,
+      currencySymbol: currencySymbol,
       isExpense: transaction.kind == TransactionKind.expense,
       isNeutral: isTransfer,
       icon: isTransfer

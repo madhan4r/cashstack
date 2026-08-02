@@ -8,11 +8,13 @@ class CategoryDetailsState {
   final Category? category;
   final CategoryDetailsStatus status;
   final Failure? error;
+  final bool isTogglingArchive;
 
   const CategoryDetailsState({
     this.category,
     this.status = CategoryDetailsStatus.loading,
     this.error,
+    this.isTogglingArchive = false,
   });
 
   CategoryDetailsState copyWith({
@@ -20,11 +22,13 @@ class CategoryDetailsState {
     CategoryDetailsStatus? status,
     Failure? error,
     bool clearError = false,
+    bool? isTogglingArchive,
   }) {
     return CategoryDetailsState(
       category: category ?? this.category,
       status: status ?? this.status,
       error: clearError ? null : (error ?? this.error),
+      isTogglingArchive: isTogglingArchive ?? this.isTogglingArchive,
     );
   }
 }

@@ -13,6 +13,7 @@ import '../../../core/widgets/misc/scrollable_single_child.dart';
 import '../../../core/widgets/misc/section_header.dart';
 import '../../../core/widgets/navigation/app_bar.dart';
 import '../../../routes/app_routes.dart';
+import '../../../services/snackbar_service.dart';
 import '../../transactions/models/account_ref.dart';
 import '../../transactions/models/category_ref.dart';
 import '../../transactions/providers/reference_data_provider.dart';
@@ -26,6 +27,32 @@ class CategoryDetailsScreen extends ConsumerWidget {
   final String categoryId;
 
   const CategoryDetailsScreen({super.key, required this.categoryId});
+
+  Future<void> _handleToggleArchive(
+    BuildContext context,
+    WidgetRef ref,
+    Category category,
+  ) async {
+    final confirmed = await showArchiveCategoryConfirmation(
+      context: context,
+      categoryName: category.name,
+      isCurrentlyArchived: category.isArchived,
+      hasTransactions: category.transactionCount > 0,
+    );
+    if (confirmed != true || !context.mounted) return;
+
+    final result = await ref
+        .read(categoryDetailsControllerProvider(categoryId).notifier)
+        .toggleArchive();
+    if (!context.mounted) return;
+
+    result.when(
+      ok: (updated) => ref
+          .read(snackbarServiceProvider)
+          .showSuccess(updated.isArchived ? 'Category archived' : 'Category unarchived'),
+      err: (failure) => ref.read(snackbarServiceProvider).showError(failure.message),
+    );
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -51,12 +78,28 @@ class CategoryDetailsScreen extends ConsumerWidget {
       appBar: CashStackAppBar(
         title: detailsState.category?.name ?? 'Category',
         actions: [
-          if (detailsState.category != null)
+          if (detailsState.category case final category?) ...[
+            IconButton(
+              onPressed: detailsState.isTogglingArchive
+                  ? null
+                  : () => _handleToggleArchive(context, ref, category),
+              icon: detailsState.isTogglingArchive
+                  ? const SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : Icon(
+                      category.isArchived ? Icons.unarchive_outlined : Icons.archive_outlined,
+                    ),
+              tooltip: category.isArchived ? 'Unarchive category' : 'Archive category',
+            ),
             IconButton(
               onPressed: () => context.push(AppRoutes.editCategory(categoryId)),
               icon: const Icon(Icons.edit_outlined),
               tooltip: 'Edit category',
             ),
+          ],
         ],
       ),
       body: RefreshIndicator(

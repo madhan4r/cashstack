@@ -25,17 +25,12 @@ class SplashScreen extends ConsumerWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Container(
-                height: 80,
-                width: 80,
-                decoration: BoxDecoration(
-                  color: context.colors.primaryContainer,
-                  borderRadius: BorderRadius.circular(24),
-                ),
-                child: Icon(
-                  Icons.account_balance_wallet_rounded,
-                  size: 40,
-                  color: context.colors.onPrimaryContainer,
+              ClipRRect(
+                borderRadius: BorderRadius.circular(24),
+                child: Image.asset(
+                  'assets/images/app_icon.png',
+                  height: 80,
+                  width: 80,
                 ),
               ),
               const SizedBox(height: 24),

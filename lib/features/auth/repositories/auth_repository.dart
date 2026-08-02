@@ -39,6 +39,7 @@ class AuthRepository {
   Future<Result<User>> login({
     required String email,
     required String password,
+    bool rememberMe = true,
   }) async {
     try {
       final response = await _apiService.login(
@@ -47,6 +48,7 @@ class AuthRepository {
       await _storage.saveTokens(
         accessToken: response.accessToken,
         refreshToken: response.refreshToken,
+        remember: rememberMe,
       );
       return Result.ok(response.user.toDomain());
     } catch (error) {
@@ -83,6 +85,36 @@ class AuthRepository {
     try {
       final user = await _apiService.getCurrentUser();
       return Result.ok(user.toDomain());
+    } catch (error) {
+      return Result.err(mapExceptionToFailure(error));
+    }
+  }
+
+  Future<Result<User>> updateProfile({
+    String? fullName,
+    String? preferredCurrency,
+  }) async {
+    try {
+      final user = await _apiService.updateProfile(
+        fullName: fullName,
+        preferredCurrency: preferredCurrency,
+      );
+      return Result.ok(user.toDomain());
+    } catch (error) {
+      return Result.err(mapExceptionToFailure(error));
+    }
+  }
+
+  Future<Result<void>> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    try {
+      await _apiService.changePassword(
+        currentPassword: currentPassword,
+        newPassword: newPassword,
+      );
+      return const Result.ok(null);
     } catch (error) {
       return Result.err(mapExceptionToFailure(error));
     }

@@ -1,7 +1,7 @@
 import '../../../core/error/failure.dart';
 import '../models/account.dart';
 import '../models/account_type.dart';
-import '../models/currency.dart';
+import '../../../core/utils/currency.dart';
 
 /// State for [AccountFormController]. `accountId == null` means Add mode;
 /// otherwise Edit mode, and [isLoadingInitial]/[loadError] reflect fetching

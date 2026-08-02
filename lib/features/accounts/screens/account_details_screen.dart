@@ -19,7 +19,7 @@ import '../../transactions/providers/transactions_list_state.dart';
 import '../../transactions/widgets/transaction_list_tile.dart';
 import '../models/account.dart';
 import '../models/account_stats.dart';
-import '../models/currency.dart';
+import '../../../core/utils/currency.dart';
 import '../providers/providers.dart';
 import '../widgets/widgets.dart';
 

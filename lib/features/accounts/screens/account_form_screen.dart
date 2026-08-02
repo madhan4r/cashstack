@@ -115,7 +115,15 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
     final state = ref.watch(accountFormControllerProvider(widget.accountId));
 
     ref.listen(accountFormControllerProvider(widget.accountId), (previous, next) {
-      if (!next.isLoadingInitial && next.loadError == null) {
+      // Only seed from state when the existing record's async load just
+      // finished (Edit mode) — not on every field-level state change (e.g.
+      // picking a type/currency), which would otherwise stomp on whatever
+      // the user already typed into name/opening balance/description
+      // (those aren't synced to state live; they're read directly on
+      // save).
+      final justFinishedLoading =
+          (previous?.isLoadingInitial ?? false) && !next.isLoadingInitial;
+      if (!_seededFromState && justFinishedLoading && next.loadError == null) {
         _seedControllers(next);
       }
     });

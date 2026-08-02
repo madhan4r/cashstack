@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/extensions/context_extensions.dart';
+import '../../../core/session/user_scoped_providers.dart';
 import '../../../core/utils/category_icons.dart';
 import '../../../core/widgets/feedback/confirmation_dialog.dart';
 import '../../../core/widgets/feedback/error_state.dart';
@@ -14,8 +15,10 @@ import '../../../core/widgets/inputs/app_time_picker_field.dart';
 import '../../../core/widgets/misc/scrollable_single_child.dart';
 import '../../../core/widgets/misc/section_header.dart';
 import '../../../core/widgets/navigation/app_bar.dart';
+import '../../../core/utils/currency.dart';
 import '../../../services/snackbar_service.dart';
 import '../../../shared/models/transaction_kind.dart';
+import '../../auth/providers/preferred_currency_provider.dart';
 import '../../categories/models/category_selector_item.dart';
 import '../../categories/widgets/category_selector_sheet.dart';
 import '../models/models.dart';
@@ -78,9 +81,20 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
       AsyncData(:final value) => value,
       _ => null,
     };
+    final preferredCurrency = ref.watch(preferredCurrencySymbolProvider);
+    final selectedAccountId = formState.type == TransactionKind.transfer
+        ? formState.fromAccountId
+        : formState.accountId;
+    final selectedAccountCurrency =
+        referenceData?.accountsById[selectedAccountId]?.currency;
+    final currencySymbol = selectedAccountCurrency == null || selectedAccountCurrency.isEmpty
+        ? preferredCurrency
+        : currencySymbolFor(selectedAccountCurrency);
 
     ref.listen(provider, (previous, next) {
-      if (!_hydratedControllers && !next.isLoadingInitial && next.loadError == null) {
+      final justFinishedLoading =
+          (previous?.isLoadingInitial ?? false) && !next.isLoadingInitial;
+      if (!_hydratedControllers && justFinishedLoading && next.loadError == null) {
         _hydratedControllers = true;
         _amountController.text = next.amount == null
             ? ''
@@ -124,6 +138,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
               notesController: _notesController,
               categories: referenceData?.categories ?? const [],
               accounts: referenceData?.accounts ?? const [],
+              currencySymbol: currencySymbol,
               onSave: () => _handleSave(controller, formState.isEditMode),
             ),
         },
@@ -141,7 +156,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
         ref
             .read(snackbarServiceProvider)
             .showSuccess(isEditMode ? 'Transaction updated' : 'Transaction added');
-        ref.invalidate(transactionsListControllerProvider);
+        invalidateAfterTransactionChange(ref);
         context.pop();
       },
       // API failures are surfaced via ref.listen(submitError); local
@@ -166,7 +181,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
     result.when(
       ok: (_) {
         ref.read(snackbarServiceProvider).showSuccess('Transaction deleted');
-        ref.invalidate(transactionsListControllerProvider);
+        invalidateAfterTransactionChange(ref);
         context.pop();
       },
       err: (_) {},
@@ -181,6 +196,7 @@ class _FormBody extends StatelessWidget {
   final TextEditingController notesController;
   final List<CategoryRef> categories;
   final List<AccountRef> accounts;
+  final String currencySymbol;
   final VoidCallback onSave;
 
   const _FormBody({
@@ -190,6 +206,7 @@ class _FormBody extends StatelessWidget {
     required this.notesController,
     required this.categories,
     required this.accounts,
+    required this.currencySymbol,
     required this.onSave,
   });
 
@@ -214,6 +231,7 @@ class _FormBody extends StatelessWidget {
           const SizedBox(height: AppSpacing.xl),
           TransactionAmountInput(
             controller: amountController,
+            currencySymbol: currencySymbol,
             onChanged: controller.setAmount,
             errorText: formState.showValidationErrors ? formState.fieldErrors['amount'] : null,
             autofocus: !formState.isEditMode,

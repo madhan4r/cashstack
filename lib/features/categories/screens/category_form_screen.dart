@@ -115,7 +115,14 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
     final state = ref.watch(categoryFormControllerProvider(widget.categoryId));
 
     ref.listen(categoryFormControllerProvider(widget.categoryId), (previous, next) {
-      if (!next.isLoadingInitial && next.loadError == null) {
+      // Only seed from state when the existing record's async load just
+      // finished (Edit mode) — not on every field-level state change (e.g.
+      // picking a type/icon/color), which would otherwise stomp on
+      // whatever the user already typed into name/description (those
+      // aren't synced to state live; they're read directly on save).
+      final justFinishedLoading =
+          (previous?.isLoadingInitial ?? false) && !next.isLoadingInitial;
+      if (!_seededFromState && justFinishedLoading && next.loadError == null) {
         _seedControllers(next);
       }
     });

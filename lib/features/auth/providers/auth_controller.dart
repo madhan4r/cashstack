@@ -74,9 +74,14 @@ class AuthController extends Notifier<AuthState> {
   Future<Result<void>> login({
     required String email,
     required String password,
+    bool rememberMe = true,
   }) async {
     final repository = ref.read(authRepositoryProvider);
-    final result = await repository.login(email: email, password: password);
+    final result = await repository.login(
+      email: email,
+      password: password,
+      rememberMe: rememberMe,
+    );
     return result.when(
       ok: (user) {
         state = AuthState.authenticated(user);
@@ -97,6 +102,46 @@ class AuthController extends Notifier<AuthState> {
   }) {
     final repository = ref.read(authRepositoryProvider);
     return repository.resetPassword(token: token, newPassword: newPassword);
+  }
+
+  Future<Result<void>> updatePreferredCurrency(String currencyCode) =>
+      updateProfile(preferredCurrency: currencyCode);
+
+  Future<Result<void>> updateProfile({
+    String? fullName,
+    String? preferredCurrency,
+  }) async {
+    final repository = ref.read(authRepositoryProvider);
+    final result = await repository.updateProfile(
+      fullName: fullName,
+      preferredCurrency: preferredCurrency,
+    );
+    return result.when(
+      ok: (user) {
+        state = AuthState.authenticated(user);
+        return const Result.ok(null);
+      },
+      err: (failure) => Result.err(failure),
+    );
+  }
+
+  /// Changes the password, then signs the user out locally — the backend
+  /// invalidates the refresh token on a successful change, so every
+  /// session (including this one) needs to sign in again regardless.
+  Future<Result<void>> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    final repository = ref.read(authRepositoryProvider);
+    final result = await repository.changePassword(
+      currentPassword: currentPassword,
+      newPassword: newPassword,
+    );
+    if (result.isOk) {
+      await repository.clearLocalSession();
+      state = const AuthState.unauthenticated();
+    }
+    return result;
   }
 
   Future<void> logout() async {
