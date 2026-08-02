@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Mirrors AppColors.seed / semanticColors.expense in lib/core/theme/app_colors.dart -->
+    <color name="widget_background">#0B4C3D</color>
+    <color name="widget_surface">#123C31</color>
+    <color name="widget_primary">#16A34A</color>
+    <color name="widget_expense">#DC2626</color>
+    <color name="widget_text_primary">#FFFFFF</color>
+    <color name="widget_text_secondary">#B7CFC7</color>
+</resources>

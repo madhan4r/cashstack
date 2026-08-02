@@ -21,6 +21,11 @@ class Transaction extends Equatable {
   final DateTime transactionDate;
   final List<String> tags;
 
+  /// Who added this transaction — only interesting when it differs from
+  /// the signed-in user, i.e. a household member added it.
+  final String ownerId;
+  final String ownerName;
+
   const Transaction({
     required this.id,
     required this.amount,
@@ -33,6 +38,8 @@ class Transaction extends Equatable {
     this.paymentMethod,
     required this.transactionDate,
     this.tags = const [],
+    this.ownerId = '',
+    this.ownerName = '',
   });
 
   factory Transaction.fromJson(Map<String, dynamic> json) {
@@ -53,6 +60,8 @@ class Transaction extends Equatable {
       tags: (json['tags'] as List<dynamic>? ?? const [])
           .map((e) => e as String)
           .toList(),
+      ownerId: json['ownerId'] as String? ?? '',
+      ownerName: json['ownerName'] as String? ?? '',
     );
   }
 
@@ -69,5 +78,7 @@ class Transaction extends Equatable {
     paymentMethod,
     transactionDate,
     tags,
+    ownerId,
+    ownerName,
   ];
 }

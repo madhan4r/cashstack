@@ -13,6 +13,7 @@ import '../../../routes/app_routes.dart';
 import '../../auth/providers/auth_controller.dart';
 import '../../auth/providers/preferred_currency_provider.dart';
 import '../../budget/widgets/set_budget_sheet.dart';
+import '../../household/widgets/pending_household_invite_banner.dart';
 import '../../savings_goals/widgets/savings_goals_dashboard_section.dart';
 import '../../transaction_detection/widgets/detected_transactions_banner.dart';
 import '../models/dashboard_data.dart';
@@ -128,6 +129,8 @@ class _DashboardContent extends StatelessWidget {
           ),
         ),
         const DetectedTransactionsBanner(),
+        const SizedBox(height: AppSpacing.sm),
+        const PendingHouseholdInviteBanner(),
         _sectionGap,
         StaggeredEntrance(
           delay: const Duration(milliseconds: 80),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/extensions/context_extensions.dart';
@@ -8,6 +9,7 @@ import '../../../core/utils/category_icons.dart';
 import '../../../core/utils/color_utils.dart';
 import '../../../core/widgets/cards/app_card.dart';
 import '../../../shared/models/transaction_kind.dart';
+import '../../auth/providers/auth_controller.dart';
 import '../models/account_ref.dart';
 import '../models/category_ref.dart';
 import '../models/transaction.dart';
@@ -16,8 +18,10 @@ import '../models/transaction.dart';
 /// category name, notes, account name, date, payment method, and a
 /// color-coded signed amount. Purely presentational — category/account
 /// names are passed in already resolved (see `ReferenceData`) rather than
-/// looked up here.
-class TransactionListTile extends StatelessWidget {
+/// looked up here. A `ConsumerWidget` (not fully stateless) purely to check
+/// whether this transaction was added by the signed-in user or a household
+/// member — see [transaction]'s `ownerName`.
+class TransactionListTile extends ConsumerWidget {
   final Transaction transaction;
   final CategoryRef? category;
   final AccountRef? account;
@@ -32,8 +36,11 @@ class TransactionListTile extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final semantic = context.semanticColors;
+    final myUserId = ref.watch(authControllerProvider).user?.id;
+    final isSharedItem =
+        transaction.ownerId.isNotEmpty && transaction.ownerId != myUserId;
     final isTransfer = transaction.kind == TransactionKind.transfer;
     final isExpense = transaction.kind == TransactionKind.expense;
 
@@ -56,6 +63,7 @@ class TransactionListTile extends StatelessWidget {
       if (account != null) account!.name,
       transaction.transactionDate.toRelativeLabel(),
       if (transaction.paymentMethod != null) transaction.paymentMethod!.label,
+      if (isSharedItem) 'via ${transaction.ownerName}',
     ];
 
     return AppCard(

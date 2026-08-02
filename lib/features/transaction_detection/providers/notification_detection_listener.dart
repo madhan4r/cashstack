@@ -1,3 +1,4 @@
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:notification_listener_service/notification_listener_service.dart';
 
@@ -23,6 +24,17 @@ final notificationDetectionListenerProvider = Provider<void>((ref) {
   final enabled = ref.watch(smartDetectionEnabledProvider);
   if (!enabled) return;
 
+  final detectedController = ref.read(detectedTransactionsControllerProvider.notifier);
+
+  // Candidates captured natively while the app process was dead (see
+  // NativeNotificationCaptureReceiver) only ever reach Dart here — pull them
+  // in now, and again every time the app comes back to the foreground.
+  detectedController.drainNativeCaptures();
+  final lifecycleListener = AppLifecycleListener(
+    onResume: () => detectedController.drainNativeCaptures(),
+  );
+  ref.onDispose(lifecycleListener.dispose);
+
   final subscription = NotificationListenerService.notificationsStream.listen((event) {
     if (event.hasRemoved || event.packageName == _ownPackageName) return;
 
@@ -39,7 +51,7 @@ final notificationDetectionListenerProvider = Provider<void>((ref) {
       detectedAt: event.humanTime,
     );
 
-    ref.read(detectedTransactionsControllerProvider.notifier).addDetected(detected);
+    detectedController.addDetected(detected);
 
     final symbol = ref.read(preferredCurrencySymbolProvider);
     ref.read(notificationServiceProvider).showNow(

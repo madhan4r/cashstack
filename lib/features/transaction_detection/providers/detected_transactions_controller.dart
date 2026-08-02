@@ -1,7 +1,10 @@
+import 'dart:convert';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/detected_transaction.dart';
 import '../repositories/detected_transactions_repository.dart';
+import '../services/native_capture_channel.dart';
 
 /// All detected-transaction candidates (pending, added, and dismissed),
 /// newest first. Kept in one list rather than pending-only so a dismissed
@@ -33,6 +36,25 @@ class DetectedTransactionsController extends Notifier<List<DetectedTransaction>>
     final updated = [candidate, ...state];
     state = updated;
     await ref.read(detectedTransactionsRepositoryProvider).saveAll(updated);
+  }
+
+  /// Pulls in anything captured natively while the app process wasn't alive
+  /// to run the live EventChannel listener — see `NativeCaptureChannel`'s
+  /// doc. Safe to call often; malformed or already-seen entries are
+  /// silently dropped by the same dedup check `addDetected` already does.
+  Future<void> drainNativeCaptures() async {
+    final raw = await nativeCaptureChannel.drainPendingCaptures();
+    for (final entry in raw) {
+      try {
+        final candidate = DetectedTransaction.fromJson(
+          jsonDecode(entry) as Map<String, dynamic>,
+        );
+        await addDetected(candidate);
+      } catch (_) {
+        // Malformed entry from the native side — skip rather than crash the
+        // whole drain over one bad item.
+      }
+    }
   }
 
   Future<void> markAdded(String id) => _updateStatus(id, DetectedTransactionStatus.added);

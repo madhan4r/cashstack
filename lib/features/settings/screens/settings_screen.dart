@@ -6,7 +6,9 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/biometric/biometric_auth_service.dart';
 import '../../../core/biometric/biometric_lock_controller.dart';
+import '../../../core/home_widget/home_widget_screen.dart';
 import '../../../core/notifications/notifications_enabled_controller.dart';
+import '../../household/providers/household_controller.dart';
 import '../../../core/theme/theme_mode_controller.dart';
 import '../../../core/utils/currency.dart';
 import '../../../core/widgets/cards/app_list_tile.dart';
@@ -100,6 +102,7 @@ class SettingsScreen extends ConsumerWidget {
     final biometricLockEnabled = ref.watch(biometricLockEnabledProvider);
     final biometricAvailable = ref.watch(biometricAvailableProvider);
     final smartDetectionEnabled = ref.watch(smartDetectionEnabledProvider);
+    final household = ref.watch(householdControllerProvider).value;
 
     return Scaffold(
       appBar: const CashStackAppBar(title: 'Settings', showBackButton: false),
@@ -134,6 +137,14 @@ class SettingsScreen extends ConsumerWidget {
             title: 'Savings Goals',
             subtitle: 'Track progress toward what you\'re saving for',
             onTap: () => context.push(AppRoutes.savingsGoals),
+          ),
+          AppListTile(
+            leading: const Icon(Icons.groups_outlined),
+            title: 'Household',
+            subtitle: household != null
+                ? '${household.members.length} ${household.members.length == 1 ? 'member' : 'members'} sharing finances'
+                : 'Share accounts and transactions with family',
+            onTap: () => context.push(AppRoutes.household),
           ),
           AppListTile(
             leading: const Icon(Icons.currency_exchange_rounded),
@@ -185,6 +196,13 @@ class SettingsScreen extends ConsumerWidget {
                 value: smartDetectionEnabled,
                 onChanged: (value) => _toggleSmartDetection(context, ref, value),
               ),
+            ),
+          if (isHomeWidgetSupportedPlatform)
+            AppListTile(
+              leading: const Icon(Icons.widgets_outlined),
+              title: 'Home Screen Widgets',
+              subtitle: 'Balance glance and quick-add buttons',
+              onTap: () => context.push(AppRoutes.homeScreenWidgets),
             ),
           const AppListTile(
             leading: Icon(Icons.language_outlined),

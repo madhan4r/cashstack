@@ -18,6 +18,11 @@ class Account extends Equatable {
   final String? icon;
   final String? description;
   final bool isArchived;
+
+  /// Who this account belongs to — only interesting when it differs from
+  /// the signed-in user, i.e. a household member's account.
+  final String ownerId;
+  final String ownerName;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -32,6 +37,8 @@ class Account extends Equatable {
     this.icon,
     this.description,
     required this.isArchived,
+    this.ownerId = '',
+    this.ownerName = '',
     required this.createdAt,
     required this.updatedAt,
   });
@@ -49,6 +56,8 @@ class Account extends Equatable {
       icon: json['icon'] as String?,
       description: json['description'] as String?,
       isArchived: json['isArchived'] as bool? ?? false,
+      ownerId: json['ownerId'] as String? ?? '',
+      ownerName: json['ownerName'] as String? ?? '',
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
     );
@@ -66,6 +75,8 @@ class Account extends Equatable {
       icon: icon,
       description: description,
       isArchived: isArchived ?? this.isArchived,
+      ownerId: ownerId,
+      ownerName: ownerName,
       createdAt: createdAt,
       updatedAt: updatedAt,
     );
@@ -83,6 +94,8 @@ class Account extends Equatable {
     icon,
     description,
     isArchived,
+    ownerId,
+    ownerName,
     createdAt,
     updatedAt,
   ];

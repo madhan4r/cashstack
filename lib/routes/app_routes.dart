@@ -49,6 +49,10 @@ class AppRoutes {
   static const String editRecurringPattern = '/recurring/:id/edit';
 
   static const String detectedTransactions = '/detected-transactions';
+  static const String homeScreenWidgets = '/home-screen-widgets';
+
+  static const String household = '/household';
+  static const String pendingInvites = '/household/invites';
 
   static const String categoryBudgets = '/budget/categories';
 

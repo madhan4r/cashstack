@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/extensions/date_extensions.dart';
 import '../../../core/utils/color_utils.dart';
 import '../../../core/widgets/cards/account_card.dart';
+import '../../auth/providers/auth_controller.dart';
 import '../models/account.dart';
 import '../../../core/utils/currency.dart';
 
@@ -10,14 +12,17 @@ import '../../../core/utils/currency.dart';
 /// [Account] model onto the shared [AccountCard], resolving its type
 /// icon/label and currency symbol and adding the "last updated" footer and
 /// an archived badge.
-class AccountListItem extends StatelessWidget {
+class AccountListItem extends ConsumerWidget {
   final Account account;
   final VoidCallback? onTap;
 
   const AccountListItem({super.key, required this.account, this.onTap});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final myUserId = ref.watch(authControllerProvider).user?.id;
+    final isSharedItem = account.ownerId.isNotEmpty && account.ownerId != myUserId;
+
     return Opacity(
       opacity: account.isArchived ? 0.6 : 1,
       child: AccountCard(
@@ -30,7 +35,8 @@ class AccountListItem extends StatelessWidget {
         onTap: onTap,
         footer:
             'Updated ${account.updatedAt.toRelativeLabel()}'
-            '${account.isArchived ? ' • Archived' : ''}',
+            '${account.isArchived ? ' • Archived' : ''}'
+            '${isSharedItem ? ' • ${account.ownerName}\'s' : ''}',
       ),
     );
   }

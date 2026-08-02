@@ -7,6 +7,8 @@ import '../../features/categories/providers/categories_filter_provider.dart';
 import '../../features/categories/providers/categories_list_controller.dart';
 import '../../features/categories/providers/category_preferences_provider.dart';
 import '../../features/dashboard/providers/dashboard_controller.dart';
+import '../../features/household/providers/household_controller.dart';
+import '../../features/household/providers/pending_invites_controller.dart';
 import '../../features/recurring/providers/recurring_filter_provider.dart';
 import '../../features/recurring/providers/recurring_list_controller.dart';
 import '../../features/reports/providers/reports_controller.dart';
@@ -38,6 +40,8 @@ void resetUserScopedProviders(WidgetRef ref) {
   ref.invalidate(recurringFilterProvider);
   ref.invalidate(categoryBudgetsControllerProvider);
   ref.invalidate(savingsGoalsListControllerProvider);
+  ref.invalidate(householdControllerProvider);
+  ref.invalidate(pendingInvitesControllerProvider);
 }
 
 /// Every cache that a single transaction create/update/delete can affect:

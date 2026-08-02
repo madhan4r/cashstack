@@ -22,6 +22,20 @@
               android:name="io.flutter.embedding.android.NormalTheme"
               android:resource="@style/NormalTheme"
               />
+            <!-- Home-screen widget taps carry the intent's data as a
+                 cashstack:// URI (see HomeWidgetLaunchIntent), and Flutter's
+                 embedding treats any intent.data as a route to push straight
+                 into GoRouter on top of whatever it forwards to the
+                 home_widget plugin — which crashes into a "no routes for
+                 location: cashstack://..." error screen, since that URI was
+                 never meant to be a GoRouter path. `home_widget`'s own
+                 EventChannel (HomeWidgetLaunchListener) already handles that
+                 URI correctly; this just stops Flutter's built-in deep-link
+                 handling from also racing to interpret it. -->
+            <meta-data
+              android:name="flutter_deeplinking_enabled"
+              android:value="false"
+              />
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
@@ -44,6 +58,37 @@
                 <action android:name="android.service.notification.NotificationListenerService"/>
             </intent-filter>
         </service>
+        <!-- Manifest-registered twin of the notification_listener_service plugin's own
+             (process-alive-only) event forwarding, so bank notifications still get captured
+             when Android has killed the app — see NativeNotificationCaptureReceiver's doc. -->
+        <receiver
+            android:name=".NativeNotificationCaptureReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="slayer.notification.listener.service.intent"/>
+            </intent-filter>
+        </receiver>
+        <!-- Home-screen widgets, see Settings > Home Screen Widgets. -->
+        <receiver
+            android:name=".BalanceWidgetProvider"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/balance_widget_info"/>
+        </receiver>
+        <receiver
+            android:name=".QuickAddWidgetProvider"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/quick_add_widget_info"/>
+        </receiver>
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and
