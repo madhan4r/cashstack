@@ -43,7 +43,16 @@ class TransactionFormScreen extends ConsumerStatefulWidget {
   /// always wins.
   final TransactionKind? initialType;
 
-  const TransactionFormScreen({super.key, this.transactionId, this.initialType});
+  /// Preselects the amount in Add mode (e.g. confirming a detected
+  /// transaction). Ignored in Edit mode.
+  final double? initialAmount;
+
+  const TransactionFormScreen({
+    super.key,
+    this.transactionId,
+    this.initialType,
+    this.initialAmount,
+  });
 
   @override
   ConsumerState<TransactionFormScreen> createState() => _TransactionFormScreenState();
@@ -69,12 +78,16 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
     final controller = ref.read(provider.notifier);
 
     final initialType = widget.initialType;
-    if (!_appliedInitialType &&
-        initialType != null &&
-        widget.transactionId == null) {
+    final initialAmount = widget.initialAmount;
+    if (!_appliedInitialType && widget.transactionId == null) {
       _appliedInitialType = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) controller.setType(initialType);
+        if (!mounted) return;
+        if (initialType != null) controller.setType(initialType);
+        if (initialAmount != null) {
+          _amountController.text = NumberFormat.decimalPattern().format(initialAmount);
+          controller.setAmount(initialAmount);
+        }
       });
     }
     final referenceDataAsync = ref.watch(referenceDataProvider);

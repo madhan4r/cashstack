@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -13,6 +15,7 @@ import '../../../routes/app_routes.dart';
 import '../../../services/snackbar_service.dart';
 import '../../auth/providers/auth_controller.dart';
 import '../../auth/providers/preferred_currency_provider.dart';
+import '../../transaction_detection/providers/smart_detection_enabled_controller.dart';
 import '../widgets/currency_picker_sheet.dart';
 import '../widgets/theme_mode_picker_sheet.dart';
 
@@ -75,6 +78,20 @@ class SettingsScreen extends ConsumerWidget {
     }
   }
 
+  Future<void> _toggleSmartDetection(BuildContext context, WidgetRef ref, bool enable) async {
+    final notifier = ref.read(smartDetectionEnabledProvider.notifier);
+    if (enable) {
+      final granted = await notifier.enable();
+      if (!granted && context.mounted) {
+        ref
+            .read(snackbarServiceProvider)
+            .showError('Notification access wasn\'t granted');
+      }
+    } else {
+      await notifier.disable();
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final currency = ref.watch(preferredCurrencyProvider);
@@ -82,6 +99,7 @@ class SettingsScreen extends ConsumerWidget {
     final notificationsEnabled = ref.watch(notificationsEnabledProvider);
     final biometricLockEnabled = ref.watch(biometricLockEnabledProvider);
     final biometricAvailable = ref.watch(biometricAvailableProvider);
+    final smartDetectionEnabled = ref.watch(smartDetectionEnabledProvider);
 
     return Scaffold(
       appBar: const CashStackAppBar(title: 'Settings', showBackButton: false),
@@ -104,6 +122,18 @@ class SettingsScreen extends ConsumerWidget {
             title: 'Recurring Transactions',
             subtitle: 'Automate bills, subscriptions, and salary',
             onTap: () => context.push(AppRoutes.recurring),
+          ),
+          AppListTile(
+            leading: const Icon(Icons.donut_small_outlined),
+            title: 'Category Budgets',
+            subtitle: 'Set monthly limits per category',
+            onTap: () => context.push(AppRoutes.categoryBudgets),
+          ),
+          AppListTile(
+            leading: const Icon(Icons.savings_outlined),
+            title: 'Savings Goals',
+            subtitle: 'Track progress toward what you\'re saving for',
+            onTap: () => context.push(AppRoutes.savingsGoals),
           ),
           AppListTile(
             leading: const Icon(Icons.currency_exchange_rounded),
@@ -144,6 +174,18 @@ class SettingsScreen extends ConsumerWidget {
                 : const SizedBox.shrink(),
             orElse: () => const SizedBox.shrink(),
           ),
+          if (Platform.isAndroid)
+            AppListTile(
+              leading: const Icon(Icons.receipt_long_outlined),
+              title: 'Smart Transaction Detection',
+              subtitle: smartDetectionEnabled
+                  ? 'Suggests transactions from bank notifications'
+                  : 'Off',
+              trailing: Switch(
+                value: smartDetectionEnabled,
+                onChanged: (value) => _toggleSmartDetection(context, ref, value),
+              ),
+            ),
           const AppListTile(
             leading: Icon(Icons.language_outlined),
             title: 'Language',

@@ -13,6 +13,8 @@ import '../../../routes/app_routes.dart';
 import '../../auth/providers/auth_controller.dart';
 import '../../auth/providers/preferred_currency_provider.dart';
 import '../../budget/widgets/set_budget_sheet.dart';
+import '../../savings_goals/widgets/savings_goals_dashboard_section.dart';
+import '../../transaction_detection/widgets/detected_transactions_banner.dart';
 import '../models/dashboard_data.dart';
 import '../providers/dashboard_controller.dart';
 import '../widgets/analytics_card.dart';
@@ -125,6 +127,7 @@ class _DashboardContent extends StatelessWidget {
             currencySymbol: currencySymbol,
           ),
         ),
+        const DetectedTransactionsBanner(),
         _sectionGap,
         StaggeredEntrance(
           delay: const Duration(milliseconds: 80),
@@ -211,6 +214,11 @@ class _DashboardContent extends StatelessWidget {
               ),
             ],
           ),
+        ),
+        _sectionGap,
+        const StaggeredEntrance(
+          delay: Duration(milliseconds: 360),
+          child: SavingsGoalsDashboardSection(),
         ),
         _sectionGap,
         StaggeredEntrance(

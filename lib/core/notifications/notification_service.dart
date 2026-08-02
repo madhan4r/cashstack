@@ -8,6 +8,11 @@ const _channelName = 'Recurring transaction reminders';
 const _channelDescription =
     'Reminders for upcoming bills, subscriptions, and other recurring transactions';
 
+const _detectedChannelId = 'detected_transactions';
+const _detectedChannelName = 'Detected transactions';
+const _detectedChannelDescription =
+    'Prompts to review a transaction detected from a bank notification';
+
 /// Thin wrapper around [FlutterLocalNotificationsPlugin] scoped to exactly
 /// what this app needs: reminders for recurring-transaction due dates.
 /// Nothing outside this file should touch the plugin directly.
@@ -91,6 +96,28 @@ class NotificationService {
           _channelId,
           _channelName,
           channelDescription: _channelDescription,
+          importance: Importance.defaultImportance,
+          priority: Priority.defaultPriority,
+        ),
+        iOS: DarwinNotificationDetails(),
+      ),
+    );
+  }
+
+  /// Shows a notification immediately (as opposed to [scheduleReminder]'s
+  /// future-dated ones) — used to prompt reviewing a just-detected
+  /// transaction.
+  Future<void> showNow({required int id, required String title, required String body}) async {
+    await _ensureInitialized();
+    await _plugin.show(
+      id: id,
+      title: title,
+      body: body,
+      notificationDetails: const NotificationDetails(
+        android: AndroidNotificationDetails(
+          _detectedChannelId,
+          _detectedChannelName,
+          channelDescription: _detectedChannelDescription,
           importance: Importance.defaultImportance,
           priority: Priority.defaultPriority,
         ),

@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../features/accounts/providers/accounts_filter_provider.dart';
 import '../../features/accounts/providers/accounts_list_controller.dart';
+import '../../features/budget/providers/category_budgets_controller.dart';
 import '../../features/categories/providers/categories_filter_provider.dart';
 import '../../features/categories/providers/categories_list_controller.dart';
 import '../../features/categories/providers/category_preferences_provider.dart';
@@ -10,6 +11,7 @@ import '../../features/recurring/providers/recurring_filter_provider.dart';
 import '../../features/recurring/providers/recurring_list_controller.dart';
 import '../../features/reports/providers/reports_controller.dart';
 import '../../features/reports/providers/reports_filter_provider.dart';
+import '../../features/savings_goals/providers/savings_goals_list_controller.dart';
 import '../../features/transactions/providers/reference_data_provider.dart';
 import '../../features/transactions/providers/transaction_filter_provider.dart';
 import '../../features/transactions/providers/transactions_list_controller.dart';
@@ -34,6 +36,8 @@ void resetUserScopedProviders(WidgetRef ref) {
   ref.invalidate(reportsFilterProvider);
   ref.invalidate(recurringListControllerProvider);
   ref.invalidate(recurringFilterProvider);
+  ref.invalidate(categoryBudgetsControllerProvider);
+  ref.invalidate(savingsGoalsListControllerProvider);
 }
 
 /// Every cache that a single transaction create/update/delete can affect:
@@ -47,4 +51,5 @@ void invalidateAfterTransactionChange(WidgetRef ref) {
   ref.invalidate(referenceDataProvider);
   ref.invalidate(accountsListControllerProvider);
   ref.invalidate(reportsControllerProvider);
+  ref.invalidate(categoryBudgetsControllerProvider);
 }

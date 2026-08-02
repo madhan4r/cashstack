@@ -47,4 +47,17 @@ class AppRoutes {
 
   static String editRecurring(String recurringId) => '/recurring/$recurringId/edit';
   static const String editRecurringPattern = '/recurring/:id/edit';
+
+  static const String detectedTransactions = '/detected-transactions';
+
+  static const String categoryBudgets = '/budget/categories';
+
+  static const String savingsGoals = '/savings-goals';
+  static const String addSavingsGoal = '/savings-goals/new';
+
+  /// Also doubles as the edit screen — [SavingsGoalFormScreen] handles
+  /// both detail-viewing and editing in one screen, same as this app's
+  /// other Add/Edit forms.
+  static String savingsGoalDetails(String goalId) => '/savings-goals/$goalId';
+  static const String savingsGoalDetailsPattern = '/savings-goals/:id';
 }

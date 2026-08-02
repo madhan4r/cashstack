@@ -11,6 +11,7 @@ import 'core/theme/theme_mode_controller.dart';
 import 'core/widgets/misc/feedback_launcher.dart';
 import 'features/auth/providers/auth_controller.dart';
 import 'features/auth/providers/auth_state.dart';
+import 'features/transaction_detection/providers/notification_detection_listener.dart';
 import 'routes/app_router.dart';
 import 'services/snackbar_service.dart';
 
@@ -23,6 +24,13 @@ class CashStackApp extends ConsumerWidget {
     final snackbarService = ref.watch(snackbarServiceProvider);
     final themeMode = ref.watch(themeModeControllerProvider);
     final boundaryKey = ref.watch(screenshotBoundaryKeyProvider);
+    final isAuthenticated = ref.watch(authControllerProvider).isAuthenticated;
+
+    // Keeps the bank-notification subscription alive (see the provider's
+    // own doc) for as long as the user is signed in and has Smart
+    // Transaction Detection turned on — a signed-out session shouldn't be
+    // suggesting transactions for anyone to confirm.
+    if (isAuthenticated) ref.watch(notificationDetectionListenerProvider);
 
     // Every screen's data providers cache their last fetch indefinitely
     // (they're not autoDispose) so the app doesn't refetch on every
@@ -46,7 +54,6 @@ class CashStackApp extends ConsumerWidget {
       routerConfig: router,
       builder: (context, child) {
         if (child == null) return const SizedBox.shrink();
-        final isAuthenticated = ref.watch(authControllerProvider).isAuthenticated;
         return AppLockGate(
           child: Stack(
             children: [

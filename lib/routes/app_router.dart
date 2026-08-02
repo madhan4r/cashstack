@@ -9,13 +9,17 @@ import '../features/auth/screens/login_screen.dart';
 import '../features/auth/screens/register_screen.dart';
 import '../features/auth/screens/reset_password_screen.dart';
 import '../features/accounts/screens/screens.dart';
+import '../features/budget/screens/category_budgets_screen.dart';
 import '../features/categories/screens/screens.dart';
 import '../features/dashboard/screens/dashboard_screen.dart';
 import '../features/feedback/screens/feedback_screen.dart';
+import '../features/transaction_detection/screens/detected_transactions_screen.dart';
 import '../features/recurring/screens/screens.dart';
 import '../features/reports/screens/screens.dart';
 import '../features/profile/screens/change_password_screen.dart';
 import '../features/profile/screens/profile_screen.dart';
+import '../features/savings_goals/screens/savings_goal_form_screen.dart';
+import '../features/savings_goals/screens/savings_goals_list_screen.dart';
 import '../features/settings/screens/settings_screen.dart';
 import '../features/splash/screens/splash_screen.dart';
 import '../features/transactions/screens/transaction_form_screen.dart';
@@ -104,7 +108,9 @@ final goRouterProvider = Provider<GoRouter>((ref) {
               : TransactionKind.values
                   .cast<TransactionKind?>()
                   .firstWhere((kind) => kind!.toJson() == typeParam, orElse: () => null);
-          return TransactionFormScreen(initialType: initialType);
+          final amountParam = state.uri.queryParameters['amount'];
+          final initialAmount = amountParam == null ? null : double.tryParse(amountParam);
+          return TransactionFormScreen(initialType: initialType, initialAmount: initialAmount);
         },
       ),
       GoRoute(
@@ -162,6 +168,10 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const FeedbackScreen(),
       ),
       GoRoute(
+        path: AppRoutes.detectedTransactions,
+        builder: (context, state) => const DetectedTransactionsScreen(),
+      ),
+      GoRoute(
         path: AppRoutes.recurring,
         builder: (context, state) => const RecurringListScreen(),
       ),
@@ -173,6 +183,23 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.editRecurringPattern,
         builder: (context, state) =>
             RecurringFormScreen(recurringId: state.pathParameters['id']),
+      ),
+      GoRoute(
+        path: AppRoutes.categoryBudgets,
+        builder: (context, state) => const CategoryBudgetsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.savingsGoals,
+        builder: (context, state) => const SavingsGoalsListScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.addSavingsGoal,
+        builder: (context, state) => const SavingsGoalFormScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.savingsGoalDetailsPattern,
+        builder: (context, state) =>
+            SavingsGoalFormScreen(goalId: state.pathParameters['id']),
       ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) =>
