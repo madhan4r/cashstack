@@ -10,8 +10,10 @@ class DashboardData {
   final double monthlyExpense;
   final double monthlySavings;
 
-  /// Always 0 today — the backend has no Budgets module yet. Kept so the
-  /// UI is ready the moment it does; see [BudgetSummaryCard].
+  /// The user's set monthly budget, or `null` if they haven't set one.
+  final double? monthlyBudget;
+
+  /// `monthlyBudget` minus `monthlyExpense`; 0 when no budget is set.
   final double budgetRemaining;
 
   final List<DashboardTransaction> recentTransactions;
@@ -23,6 +25,7 @@ class DashboardData {
     required this.monthlyIncome,
     required this.monthlyExpense,
     required this.monthlySavings,
+    required this.monthlyBudget,
     required this.budgetRemaining,
     required this.recentTransactions,
     required this.expenseByCategory,
@@ -39,6 +42,7 @@ class DashboardData {
       monthlyIncome: (json['monthlyIncome'] as num).toDouble(),
       monthlyExpense: (json['monthlyExpense'] as num).toDouble(),
       monthlySavings: (json['monthlySavings'] as num).toDouble(),
+      monthlyBudget: (json['monthlyBudget'] as num?)?.toDouble(),
       budgetRemaining: (json['budgetRemaining'] as num).toDouble(),
       recentTransactions: (json['recentTransactions'] as List<dynamic>)
           .map((e) => DashboardTransaction.fromJson(e as Map<String, dynamic>))

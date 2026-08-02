@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/biometric/biometric_auth_service.dart';
+import '../../../core/biometric/biometric_lock_controller.dart';
+import '../../../core/notifications/notifications_enabled_controller.dart';
 import '../../../core/theme/theme_mode_controller.dart';
 import '../../../core/utils/currency.dart';
 import '../../../core/widgets/cards/app_list_tile.dart';
@@ -44,10 +47,41 @@ class SettingsScreen extends ConsumerWidget {
     ThemeMode.dark => 'Dark',
   };
 
+  Future<void> _toggleNotifications(WidgetRef ref, bool enable) async {
+    final notifier = ref.read(notificationsEnabledProvider.notifier);
+    if (enable) {
+      final granted = await notifier.enable();
+      if (!granted) {
+        ref
+            .read(snackbarServiceProvider)
+            .showError('Notifications permission was denied');
+      }
+    } else {
+      await notifier.disable();
+    }
+  }
+
+  Future<void> _toggleBiometricLock(WidgetRef ref, bool enable) async {
+    final notifier = ref.read(biometricLockEnabledProvider.notifier);
+    if (enable) {
+      final verified = await notifier.enable();
+      if (!verified) {
+        ref
+            .read(snackbarServiceProvider)
+            .showError("Couldn't verify your fingerprint/Face ID");
+      }
+    } else {
+      await notifier.disable();
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final currency = ref.watch(preferredCurrencyProvider);
     final themeMode = ref.watch(themeModeControllerProvider);
+    final notificationsEnabled = ref.watch(notificationsEnabledProvider);
+    final biometricLockEnabled = ref.watch(biometricLockEnabledProvider);
+    final biometricAvailable = ref.watch(biometricAvailableProvider);
 
     return Scaffold(
       appBar: const CashStackAppBar(title: 'Settings', showBackButton: false),
@@ -83,10 +117,32 @@ class SettingsScreen extends ConsumerWidget {
             subtitle: _themeModeLabel(themeMode),
             onTap: () => _pickThemeMode(context, ref),
           ),
-          const AppListTile(
-            leading: Icon(Icons.notifications_outlined),
+          AppListTile(
+            leading: const Icon(Icons.notifications_outlined),
             title: 'Notifications',
-            subtitle: 'Coming soon',
+            subtitle: notificationsEnabled
+                ? 'Reminders for upcoming recurring transactions'
+                : 'Off',
+            trailing: Switch(
+              value: notificationsEnabled,
+              onChanged: (value) => _toggleNotifications(ref, value),
+            ),
+          ),
+          biometricAvailable.maybeWhen(
+            data: (available) => available
+                ? AppListTile(
+                    leading: const Icon(Icons.fingerprint_rounded),
+                    title: 'App Lock',
+                    subtitle: biometricLockEnabled
+                        ? 'Unlock with fingerprint/Face ID'
+                        : 'Off',
+                    trailing: Switch(
+                      value: biometricLockEnabled,
+                      onChanged: (value) => _toggleBiometricLock(ref, value),
+                    ),
+                  )
+                : const SizedBox.shrink(),
+            orElse: () => const SizedBox.shrink(),
           ),
           const AppListTile(
             leading: Icon(Icons.language_outlined),

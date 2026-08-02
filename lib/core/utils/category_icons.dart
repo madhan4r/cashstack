@@ -67,6 +67,14 @@ const _icons = <String, IconData>{
   'dog': Icons.cruelty_free_outlined,
   // Gifts
   'gift': Icons.card_giftcard_outlined,
+  // Home
+  'home': Icons.home_outlined,
+  // Insurance
+  'insurance': Icons.shield_outlined,
+  // Subscriptions
+  'subscription': Icons.subscriptions_outlined,
+  // Personal care
+  'personal-care': Icons.spa_outlined,
   // Other
   'more-horizontal': Icons.more_horiz_rounded,
   'category': Icons.category_outlined,

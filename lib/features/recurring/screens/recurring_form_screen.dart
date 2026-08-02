@@ -246,6 +246,7 @@ class _FormContent extends ConsumerWidget {
                   context: context,
                   categories: items,
                   selectedCategoryId: state.categoryId,
+                  categoryType: _categoryType,
                 );
                 if (id != null) controller.setCategory(id);
               },

@@ -2,17 +2,24 @@ import 'package:flutter/material.dart';
 
 import '../../../core/widgets/feedback/app_bottom_sheet.dart';
 import '../models/category_selector_item.dart';
+import '../models/category_type.dart';
 import 'category_selector.dart';
+import 'quick_add_category_sheet.dart';
 
 /// Shows the reusable [CategorySelector] in a bottom sheet and returns the
 /// selected category id, or `null` if dismissed without a selection. The
 /// caller is responsible for pre-scoping [categories] (e.g. to a single
 /// Expense/Income type) — the selector itself is agnostic to that.
+///
+/// Pass [categoryType] to also offer "Add new category" inline — omitting
+/// it hides that option, since creating a category needs to know which
+/// type it belongs to.
 Future<String?> showCategorySelectorSheet({
   required BuildContext context,
   required List<CategorySelectorItem> categories,
   String? selectedCategoryId,
   String title = 'Select category',
+  CategoryType? categoryType,
 }) {
   return showAppBottomSheet<String>(
     context: context,
@@ -21,6 +28,17 @@ Future<String?> showCategorySelectorSheet({
       categories: categories,
       selectedCategoryId: selectedCategoryId,
       onSelected: (id) => Navigator.of(context).pop(id),
+      onCreateNew: categoryType == null
+          ? null
+          : () async {
+              final created = await showQuickAddCategorySheet(
+                context: context,
+                type: categoryType,
+              );
+              if (created != null && context.mounted) {
+                Navigator.of(context).pop(created.id);
+              }
+            },
     ),
   );
 }

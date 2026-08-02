@@ -48,6 +48,8 @@ class InsightCard extends StatelessWidget {
                   style: context.textStyles.bodySmall?.copyWith(
                     color: context.colors.onSurfaceVariant,
                   ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 2),
                 Text(

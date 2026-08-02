@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../session/screenshot_capture.dart';
+import '../../../routes/app_router.dart';
 import '../../../routes/app_routes.dart';
 
 /// Small floating affordance, present on every authenticated screen (see
@@ -28,7 +28,11 @@ class _FeedbackLauncherState extends ConsumerState<FeedbackLauncher> {
 
     ref.read(pendingFeedbackScreenshotProvider.notifier).set(bytes);
     if (!mounted) return;
-    context.push(AppRoutes.feedback);
+    // This widget is a sibling of the Router in the Stack built by
+    // MaterialApp.router's `builder` (see app.dart) — not a descendant of
+    // it — so its own BuildContext has no GoRouter ancestor. Push through
+    // the router instance directly instead of `context.push`.
+    ref.read(goRouterProvider).push(AppRoutes.feedback);
   }
 
   @override

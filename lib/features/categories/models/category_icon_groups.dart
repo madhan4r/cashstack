@@ -6,8 +6,8 @@ const categoryIconGroups = <String, List<String>>{
   'Food': ['utensils', 'coffee', 'pizza', 'cake', 'fastfood'],
   'Transport': ['car', 'bus', 'train', 'bike', 'fuel', 'taxi'],
   'Shopping': ['shopping-bag', 'shopping-cart', 'tag', 'store'],
-  'Bills': ['file-text', 'receipt', 'zap', 'wifi', 'phone'],
-  'Health': ['heart', 'pill', 'hospital', 'fitness'],
+  'Bills': ['file-text', 'receipt', 'zap', 'wifi', 'phone', 'subscription', 'insurance'],
+  'Health': ['heart', 'pill', 'hospital', 'fitness', 'personal-care'],
   'Entertainment': ['film', 'music', 'gamepad', 'ticket'],
   'Travel': ['plane', 'luggage', 'map', 'hotel'],
   'Salary': ['briefcase', 'cash', 'wallet'],
@@ -15,5 +15,6 @@ const categoryIconGroups = <String, List<String>>{
   'Education': ['book', 'graduation-cap', 'school'],
   'Pets': ['paw', 'dog'],
   'Gifts': ['gift'],
+  'Home': ['home'],
   'Other': ['more-horizontal', 'category', 'question-mark', 'plus-circle'],
 };

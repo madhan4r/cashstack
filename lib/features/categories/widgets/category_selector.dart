@@ -18,11 +18,17 @@ class CategorySelector extends ConsumerStatefulWidget {
   final String? selectedCategoryId;
   final ValueChanged<String> onSelected;
 
+  /// When provided, shows an "Add new category" row so the user can
+  /// create one without leaving whatever screen opened this selector
+  /// (e.g. the transaction form) — `null` hides it entirely.
+  final VoidCallback? onCreateNew;
+
   const CategorySelector({
     super.key,
     required this.categories,
     required this.onSelected,
     this.selectedCategoryId,
+    this.onCreateNew,
   });
 
   @override
@@ -62,6 +68,10 @@ class _CategorySelectorState extends ConsumerState<CategorySelector> {
           hint: 'Search categories',
           onChanged: (value) => setState(() => _query = value),
         ),
+        if (widget.onCreateNew != null) ...[
+          const SizedBox(height: AppSpacing.sm),
+          _AddNewCategoryButton(onTap: widget.onCreateNew!),
+        ],
         const SizedBox(height: AppSpacing.md),
         Flexible(
           child: SingleChildScrollView(
@@ -139,5 +149,24 @@ class _CategorySelectorState extends ConsumerState<CategorySelector> {
 
   void _handleToggleFavorite(String categoryId) {
     ref.read(categoryPreferencesProvider.notifier).toggleFavorite(categoryId);
+  }
+}
+
+class _AddNewCategoryButton extends StatelessWidget {
+  final VoidCallback onTap;
+
+  const _AddNewCategoryButton({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return OutlinedButton.icon(
+      onPressed: onTap,
+      icon: const Icon(Icons.add_rounded, size: 18),
+      label: const Text('Add new category'),
+      style: OutlinedButton.styleFrom(
+        alignment: Alignment.centerLeft,
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
+      ),
+    );
   }
 }

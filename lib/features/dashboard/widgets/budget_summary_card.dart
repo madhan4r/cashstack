@@ -7,11 +7,9 @@ import '../../../core/extensions/num_extensions.dart';
 import '../../../core/widgets/cards/app_card.dart';
 
 /// Budget vs. spent for the current month, with a progress indicator.
-///
-/// There is no Budgets module on the backend yet, so [budget] is `null`
-/// until one exists — in that case this renders a "no budget set" prompt
-/// instead of a fabricated progress bar. Once a real budget/limit value is
-/// available, pass it in and the full progress view renders.
+/// [budget] is `null` when the user hasn't set one yet, in which case this
+/// renders a "no budget set" prompt instead. Tapping the card (either
+/// state) opens the Set/Change Budget sheet via [onSetBudget].
 class BudgetSummaryCard extends StatelessWidget {
   final double? budget;
   final double spent;
@@ -82,6 +80,7 @@ class BudgetSummaryCard extends StatelessWidget {
         : context.colors.primary;
 
     return AppCard(
+      onTap: onSetBudget,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

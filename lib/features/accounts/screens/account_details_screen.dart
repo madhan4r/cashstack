@@ -223,6 +223,7 @@ class _TransactionsSection extends StatelessWidget {
               transaction: transaction,
               category: categoriesById[transaction.categoryId],
               account: accountsById[transaction.accountId],
+              onTap: () => context.push(AppRoutes.editTransaction(transaction.id)),
             ),
           ),
         if (transactionsState.hasMore)

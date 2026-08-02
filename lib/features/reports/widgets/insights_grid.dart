@@ -23,50 +23,60 @@ class InsightsGrid extends StatelessWidget {
     final mostUsedCategory = data.mostUsedCategory;
     final largestTransaction = data.largestTransaction;
 
-    return GridView.count(
-      crossAxisCount: 2,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      mainAxisSpacing: AppSpacing.sm,
-      crossAxisSpacing: AppSpacing.sm,
-      childAspectRatio: 2.6,
-      children: [
-        InsightCard(
-          label: 'Highest Spending Category',
-          value: highestCategory == null
-              ? '—'
-              : '${highestCategory.categoryName} • $currencySymbol${highestCategory.amount.toAmount()}',
-          icon: Icons.local_fire_department_outlined,
-          color: semantic.expense,
-        ),
-        InsightCard(
-          label: 'Largest Transaction',
-          value: largestTransaction == null
-              ? '—'
-              : '$currencySymbol${largestTransaction.amount.toAmount()}',
-          icon: Icons.trending_up_rounded,
-        ),
-        InsightCard(
-          label: 'Average Daily Spending',
-          value: '$currencySymbol${data.averageDailySpending.toAmount()}',
-          icon: Icons.calendar_today_outlined,
-        ),
-        InsightCard(
-          label: 'Transactions',
-          value: '${data.summary.transactionCount}',
-          icon: Icons.receipt_long_outlined,
-        ),
-        InsightCard(
-          label: 'Most Used Account',
-          value: mostUsedAccount?.accountName ?? '—',
-          icon: Icons.account_balance_wallet_outlined,
-        ),
-        InsightCard(
-          label: 'Most Used Category',
-          value: mostUsedCategory?.categoryName ?? '—',
-          icon: Icons.category_outlined,
-        ),
-      ],
+    final cards = [
+      InsightCard(
+        label: 'Highest Spending Category',
+        value: highestCategory == null
+            ? '—'
+            : '${highestCategory.categoryName} • $currencySymbol${highestCategory.amount.toAmount()}',
+        icon: Icons.local_fire_department_outlined,
+        color: semantic.expense,
+      ),
+      InsightCard(
+        label: 'Largest Transaction',
+        value: largestTransaction == null
+            ? '—'
+            : '$currencySymbol${largestTransaction.amount.toAmount()}',
+        icon: Icons.trending_up_rounded,
+      ),
+      InsightCard(
+        label: 'Average Daily Spending',
+        value: '$currencySymbol${data.averageDailySpending.toAmount()}',
+        icon: Icons.calendar_today_outlined,
+      ),
+      InsightCard(
+        label: 'Transactions',
+        value: '${data.summary.transactionCount}',
+        icon: Icons.receipt_long_outlined,
+      ),
+      InsightCard(
+        label: 'Most Used Account',
+        value: mostUsedAccount?.accountName ?? '—',
+        icon: Icons.account_balance_wallet_outlined,
+      ),
+      InsightCard(
+        label: 'Most Used Category',
+        value: mostUsedCategory?.categoryName ?? '—',
+        icon: Icons.category_outlined,
+      ),
+    ];
+
+    // A GridView forces every cell to a fixed height (via childAspectRatio),
+    // which overflows as soon as a label wraps to more lines than that
+    // ratio assumed (e.g. "Highest Spending Category" on a narrow column,
+    // or a larger system font-scale setting). A Wrap of fixed-width cards
+    // lets each one size to its own content height instead.
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final cellWidth = (constraints.maxWidth - AppSpacing.sm) / 2;
+        return Wrap(
+          spacing: AppSpacing.sm,
+          runSpacing: AppSpacing.sm,
+          children: [
+            for (final card in cards) SizedBox(width: cellWidth, child: card),
+          ],
+        );
+      },
     );
   }
 }

@@ -20,6 +20,7 @@ import '../../../services/snackbar_service.dart';
 import '../../../shared/models/transaction_kind.dart';
 import '../../auth/providers/preferred_currency_provider.dart';
 import '../../categories/models/category_selector_item.dart';
+import '../../categories/models/category_type.dart';
 import '../../categories/widgets/category_selector_sheet.dart';
 import '../models/models.dart';
 import '../providers/providers.dart';
@@ -296,6 +297,9 @@ class _FormBody extends StatelessWidget {
                   context: context,
                   categories: categoriesForType,
                   selectedCategoryId: formState.categoryId,
+                  categoryType: formState.type == TransactionKind.income
+                      ? CategoryType.income
+                      : CategoryType.expense,
                 );
                 if (id != null) controller.setCategory(id);
               },

@@ -48,27 +48,35 @@ class TransactionAmountInput extends StatelessWidget {
               ),
             ),
             const SizedBox(width: AppSpacing.xs),
-            IntrinsicWidth(
-              child: TextField(
-                controller: controller,
-                autofocus: autofocus,
-                textAlign: TextAlign.center,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                inputFormatters: [ThousandsSeparatorFormatter()],
-                style: context.textStyles.displaySmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: hasError ? errorColor : null,
+            ConstrainedBox(
+              constraints: const BoxConstraints(minWidth: 80),
+              child: IntrinsicWidth(
+                child: TextField(
+                  controller: controller,
+                  autofocus: autofocus,
+                  textAlign: TextAlign.center,
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  inputFormatters: [ThousandsSeparatorFormatter()],
+                  style: context.textStyles.displaySmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: hasError ? errorColor : null,
+                  ),
+                  cursorColor: hasError ? errorColor : null,
+                  decoration: InputDecoration(
+                    hintText: '0',
+                    border: InputBorder.none,
+                    enabledBorder: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                    errorBorder: InputBorder.none,
+                    focusedErrorBorder: InputBorder.none,
+                    isDense: true,
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                  onChanged: (value) {
+                    final parsed = double.tryParse(value.replaceAll(',', '')) ?? 0;
+                    onChanged(parsed);
+                  },
                 ),
-                decoration: const InputDecoration(
-                  hintText: '0',
-                  border: InputBorder.none,
-                  isDense: true,
-                  contentPadding: EdgeInsets.zero,
-                ),
-                onChanged: (value) {
-                  final parsed = double.tryParse(value.replaceAll(',', '')) ?? 0;
-                  onChanged(parsed);
-                },
               ),
             ),
           ],

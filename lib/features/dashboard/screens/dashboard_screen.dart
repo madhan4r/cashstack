@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/error/failure.dart';
 import '../../../core/extensions/context_extensions.dart';
-import '../../../core/widgets/feedback/app_toast.dart';
 import '../../../core/widgets/feedback/empty_state.dart';
 import '../../../core/widgets/feedback/error_state.dart';
 import '../../../core/widgets/misc/scrollable_single_child.dart';
@@ -13,6 +12,7 @@ import '../../../core/widgets/misc/section_header.dart';
 import '../../../routes/app_routes.dart';
 import '../../auth/providers/auth_controller.dart';
 import '../../auth/providers/preferred_currency_provider.dart';
+import '../../budget/widgets/set_budget_sheet.dart';
 import '../models/dashboard_data.dart';
 import '../providers/dashboard_controller.dart';
 import '../widgets/analytics_card.dart';
@@ -200,11 +200,14 @@ class _DashboardContent extends StatelessWidget {
               const SectionHeader(title: 'Budget Summary'),
               const SizedBox(height: AppSpacing.md),
               BudgetSummaryCard(
-                budget: null,
+                budget: data.monthlyBudget,
                 spent: data.monthlyExpense,
                 currencySymbol: currencySymbol,
-                onSetBudget: () =>
-                    AppToast.show(context, 'Budgets are coming soon'),
+                onSetBudget: () => showSetBudgetSheet(
+                  context: context,
+                  currentAmount: data.monthlyBudget,
+                  currencySymbol: currencySymbol,
+                ),
               ),
             ],
           ),
@@ -224,6 +227,7 @@ class _DashboardContent extends StatelessWidget {
                 DashboardTransactionTile(
                   transaction: transaction,
                   currencySymbol: currencySymbol,
+                  onTap: () => context.push(AppRoutes.editTransaction(transaction.id)),
                 ),
             ],
           ),

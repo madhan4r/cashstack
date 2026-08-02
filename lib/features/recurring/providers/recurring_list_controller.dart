@@ -7,6 +7,7 @@ import '../models/recurring_filter.dart';
 import '../repositories/recurring_repository.dart';
 import 'recurring_filter_provider.dart';
 import 'recurring_list_state.dart';
+import 'recurring_reminders.dart';
 
 /// Drives the Recurring list: re-fetches whenever
 /// [recurringFilterProvider] changes (status/frequency/sort), plus
@@ -21,6 +22,11 @@ class RecurringListController extends Notifier<RecurringListState> {
     final filter = ref.watch(recurringFilterProvider);
     _filterForCurrentState = filter;
     unawaited(_load(filter));
+    // Independent of the filtered list above — always reschedules from the
+    // full, unfiltered set of recurring transactions so a status/frequency
+    // filter on this screen never cancels reminders for items it happens
+    // to be hiding right now.
+    unawaited(rescheduleRecurringReminders(ref));
     return const RecurringListState();
   }
 

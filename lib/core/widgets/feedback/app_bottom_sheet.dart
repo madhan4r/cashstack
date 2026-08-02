@@ -37,7 +37,12 @@ Future<T?> showAppBottomSheet<T>({
                 Text(title, style: Theme.of(context).textTheme.titleLarge),
                 const SizedBox(height: AppSpacing.md),
               ],
-              builder(context),
+              // A bare Column child gets unbounded height regardless of
+              // the sheet's own (bounded) max height, so a shrinkWrap
+              // ListView/GridView here would try to size to ALL of its
+              // content and overflow instead of scrolling. Flexible gives
+              // it the sheet's real bound to size and scroll within.
+              Flexible(child: builder(context)),
             ],
           ),
         ),

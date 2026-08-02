@@ -35,20 +35,27 @@ class QuickActionsGrid extends StatelessWidget {
           _ => 4,
         };
 
-        return GridView.count(
-          crossAxisCount: columns,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          mainAxisSpacing: AppSpacing.sm,
-          crossAxisSpacing: AppSpacing.sm,
-          childAspectRatio: 0.85,
+        // A GridView forces every cell to a fixed height (via
+        // childAspectRatio), which overflows as soon as the label wraps to
+        // a taller line than that ratio assumed — e.g. a larger system
+        // font-scale setting. A Wrap of fixed-width cards lets each one
+        // size to its own content height instead.
+        final cellWidth =
+            (constraints.maxWidth - AppSpacing.sm * (columns - 1)) / columns;
+
+        return Wrap(
+          spacing: AppSpacing.sm,
+          runSpacing: AppSpacing.sm,
           children: items
               .map(
-                (item) => QuickActionCard(
-                  label: item.label,
-                  icon: item.icon,
-                  color: item.color,
-                  onTap: item.onTap,
+                (item) => SizedBox(
+                  width: cellWidth,
+                  child: QuickActionCard(
+                    label: item.label,
+                    icon: item.icon,
+                    color: item.color,
+                    onTap: item.onTap,
+                  ),
                 ),
               )
               .toList(),

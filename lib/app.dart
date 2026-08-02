@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'core/biometric/app_lock_gate.dart';
+import 'core/biometric/biometric_lock_controller.dart';
 import 'core/constants/app_constants.dart';
 import 'core/session/screenshot_capture.dart';
 import 'core/session/user_scoped_providers.dart';
@@ -30,6 +32,7 @@ class CashStackApp extends ConsumerWidget {
     ref.listen<AuthState>(authControllerProvider, (previous, next) {
       if (previous?.user?.id != next.user?.id) {
         resetUserScopedProviders(ref);
+        ref.read(appUnlockedProvider.notifier).setUnlocked(false);
       }
     });
 
@@ -44,16 +47,18 @@ class CashStackApp extends ConsumerWidget {
       builder: (context, child) {
         if (child == null) return const SizedBox.shrink();
         final isAuthenticated = ref.watch(authControllerProvider).isAuthenticated;
-        return Stack(
-          children: [
-            RepaintBoundary(key: boundaryKey, child: child),
-            if (isAuthenticated)
-              Positioned(
-                left: 0,
-                bottom: 0,
-                child: FeedbackLauncher(boundaryKey: boundaryKey),
-              ),
-          ],
+        return AppLockGate(
+          child: Stack(
+            children: [
+              RepaintBoundary(key: boundaryKey, child: child),
+              if (isAuthenticated)
+                Positioned(
+                  left: 0,
+                  bottom: 0,
+                  child: FeedbackLauncher(boundaryKey: boundaryKey),
+                ),
+            ],
+          ),
         );
       },
     );
