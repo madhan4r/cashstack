@@ -10,6 +10,7 @@ class UserDto {
   final String email;
   final bool isActive;
   final String preferredCurrency;
+  final String? avatarUrl;
 
   const UserDto({
     required this.id,
@@ -17,6 +18,7 @@ class UserDto {
     required this.email,
     required this.isActive,
     required this.preferredCurrency,
+    this.avatarUrl,
   });
 
   factory UserDto.fromJson(Map<String, dynamic> json) {
@@ -26,6 +28,7 @@ class UserDto {
       email: json['email'] as String,
       isActive: json['isActive'] as bool? ?? true,
       preferredCurrency: json['preferredCurrency'] as String? ?? 'INR',
+      avatarUrl: json['avatarUrl'] as String?,
     );
   }
 
@@ -36,6 +39,7 @@ class UserDto {
       email: email,
       isActive: isActive,
       preferredCurrency: preferredCurrency,
+      avatarUrl: avatarUrl,
     );
   }
 }

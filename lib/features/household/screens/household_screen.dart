@@ -3,12 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/constants/app_spacing.dart';
+import '../../../core/error/failure.dart';
 import '../../../core/widgets/buttons/app_primary_button.dart';
 import '../../../core/widgets/cards/app_card.dart';
 import '../../../core/widgets/cards/app_list_tile.dart';
 import '../../../core/widgets/navigation/app_bar.dart';
 import '../../../routes/app_routes.dart';
 import '../../../services/snackbar_service.dart';
+import '../../accounts/screens/member_accounts_screen.dart';
 import '../../auth/providers/auth_controller.dart';
 import '../models/household.dart';
 import '../providers/household_controller.dart';
@@ -74,7 +76,10 @@ class HouseholdScreen extends ConsumerWidget {
         error: (error, _) => Center(
           child: Padding(
             padding: const EdgeInsets.all(AppSpacing.md),
-            child: Text(error.toString(), textAlign: TextAlign.center),
+            child: Text(
+              error is Failure ? error.message : error.toString(),
+              textAlign: TextAlign.center,
+            ),
           ),
         ),
         data: (household) {
@@ -104,6 +109,19 @@ class HouseholdScreen extends ConsumerWidget {
                   leading: const CircleAvatar(child: Icon(Icons.person_outline_rounded)),
                   title: member.id == myUserId ? '${member.fullName} (You)' : member.fullName,
                   subtitle: member.email,
+                  trailing: member.id == myUserId
+                      ? null
+                      : const Icon(Icons.chevron_right_rounded),
+                  onTap: member.id == myUserId
+                      ? null
+                      : () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => MemberAccountsScreen(
+                              memberId: member.id,
+                              memberName: member.fullName,
+                            ),
+                          ),
+                        ),
                 ),
               ),
               const SizedBox(height: AppSpacing.lg),

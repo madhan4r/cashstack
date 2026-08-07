@@ -146,29 +146,6 @@ class SettingsScreen extends ConsumerWidget {
                 : 'Share accounts and transactions with family',
             onTap: () => context.push(AppRoutes.household),
           ),
-          AppListTile(
-            leading: const Icon(Icons.currency_exchange_rounded),
-            title: 'Preferred Currency',
-            subtitle: '${currency.symbol} ${currency.code} — ${currency.name}',
-            onTap: () => _pickCurrency(context, ref),
-          ),
-          AppListTile(
-            leading: const Icon(Icons.dark_mode_outlined),
-            title: 'Appearance',
-            subtitle: _themeModeLabel(themeMode),
-            onTap: () => _pickThemeMode(context, ref),
-          ),
-          AppListTile(
-            leading: const Icon(Icons.notifications_outlined),
-            title: 'Notifications',
-            subtitle: notificationsEnabled
-                ? 'Reminders for upcoming recurring transactions'
-                : 'Off',
-            trailing: Switch(
-              value: notificationsEnabled,
-              onChanged: (value) => _toggleNotifications(ref, value),
-            ),
-          ),
           biometricAvailable.maybeWhen(
             data: (available) => available
                 ? AppListTile(
@@ -204,6 +181,33 @@ class SettingsScreen extends ConsumerWidget {
               subtitle: 'Balance glance and quick-add buttons',
               onTap: () => context.push(AppRoutes.homeScreenWidgets),
             ),
+          const Padding(
+            padding: EdgeInsets.fromLTRB(16, 24, 16, 8),
+            child: Divider(),
+          ),
+          AppListTile(
+            leading: const Icon(Icons.currency_exchange_rounded),
+            title: 'Preferred Currency',
+            subtitle: '${currency.symbol} ${currency.code} — ${currency.name}',
+            onTap: () => _pickCurrency(context, ref),
+          ),
+          AppListTile(
+            leading: const Icon(Icons.dark_mode_outlined),
+            title: 'Appearance',
+            subtitle: _themeModeLabel(themeMode),
+            onTap: () => _pickThemeMode(context, ref),
+          ),
+          AppListTile(
+            leading: const Icon(Icons.notifications_outlined),
+            title: 'Notifications',
+            subtitle: notificationsEnabled
+                ? 'Reminders for upcoming recurring transactions'
+                : 'Off',
+            trailing: Switch(
+              value: notificationsEnabled,
+              onChanged: (value) => _toggleNotifications(ref, value),
+            ),
+          ),
           const AppListTile(
             leading: Icon(Icons.language_outlined),
             title: 'Language',

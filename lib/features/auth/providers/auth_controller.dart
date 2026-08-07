@@ -125,6 +125,30 @@ class AuthController extends Notifier<AuthState> {
     );
   }
 
+  Future<Result<void>> uploadAvatar(String filePath) async {
+    final repository = ref.read(authRepositoryProvider);
+    final result = await repository.uploadAvatar(filePath);
+    return result.when(
+      ok: (user) {
+        state = AuthState.authenticated(user);
+        return const Result.ok(null);
+      },
+      err: (failure) => Result.err(failure),
+    );
+  }
+
+  Future<Result<void>> removeAvatar() async {
+    final repository = ref.read(authRepositoryProvider);
+    final result = await repository.removeAvatar();
+    return result.when(
+      ok: (user) {
+        state = AuthState.authenticated(user);
+        return const Result.ok(null);
+      },
+      err: (failure) => Result.err(failure),
+    );
+  }
+
   /// Changes the password, then signs the user out locally — the backend
   /// invalidates the refresh token on a successful change, so every
   /// session (including this one) needs to sign in again regardless.

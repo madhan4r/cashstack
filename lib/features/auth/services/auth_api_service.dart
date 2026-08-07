@@ -85,6 +85,39 @@ class AuthApiService {
     }
   }
 
+  Future<UserDto> uploadAvatar(String filePath) async {
+    try {
+      final response = await _dio.post<Map<String, dynamic>>(
+        '/users/me/avatar',
+        data: FormData.fromMap({
+          'avatar': await MultipartFile.fromFile(filePath),
+        }),
+      );
+      final apiResponse = ApiResponse.fromJson(
+        response.data!,
+        (json) => UserDto.fromJson(json as Map<String, dynamic>),
+      );
+      return apiResponse.data;
+    } on DioException catch (e) {
+      throw e.appException;
+    }
+  }
+
+  Future<UserDto> removeAvatar() async {
+    try {
+      final response = await _dio.delete<Map<String, dynamic>>(
+        '/users/me/avatar',
+      );
+      final apiResponse = ApiResponse.fromJson(
+        response.data!,
+        (json) => UserDto.fromJson(json as Map<String, dynamic>),
+      );
+      return apiResponse.data;
+    } on DioException catch (e) {
+      throw e.appException;
+    }
+  }
+
   Future<void> changePassword({
     required String currentPassword,
     required String newPassword,

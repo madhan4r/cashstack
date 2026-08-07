@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/constants/app_spacing.dart';
+import '../../../core/error/failure.dart';
 import '../../../core/widgets/cards/app_card.dart';
 import '../../../core/widgets/navigation/app_bar.dart';
 import '../../../services/snackbar_service.dart';
@@ -40,7 +41,10 @@ class PendingInvitesScreen extends ConsumerWidget {
         error: (error, _) => Center(
           child: Padding(
             padding: const EdgeInsets.all(AppSpacing.md),
-            child: Text(error.toString(), textAlign: TextAlign.center),
+            child: Text(
+              error is Failure ? error.message : error.toString(),
+              textAlign: TextAlign.center,
+            ),
           ),
         ),
         data: (invites) {

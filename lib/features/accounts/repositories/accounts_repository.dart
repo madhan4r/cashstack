@@ -32,6 +32,26 @@ class AccountsRepository {
     }
   }
 
+  /// A household member's accounts — read-only, works regardless of your
+  /// own combine/separate household view mode. 403s if you don't currently
+  /// share a household with them.
+  Future<List<Account>> getAccountsForMember(String memberId) async {
+    try {
+      final response = await _dio.get<Map<String, dynamic>>(
+        '/accounts/member/$memberId',
+      );
+      final apiResponse = ApiResponse.fromJson(
+        response.data!,
+        (json) => (json as List<dynamic>)
+            .map((e) => Account.fromJson(e as Map<String, dynamic>))
+            .toList(),
+      );
+      return apiResponse.data;
+    } on DioException catch (e) {
+      throw mapExceptionToFailure(e.appException);
+    }
+  }
+
   Future<Account> getAccount(String id) async {
     try {
       final response = await _dio.get<Map<String, dynamic>>('/accounts/$id');

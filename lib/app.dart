@@ -67,8 +67,16 @@ class CashStackApp extends ConsumerWidget {
     // navigation. That means a login/logout that changes *who* is signed
     // in must explicitly blow those caches away, or the next screen briefly
     // renders the previous user's accounts/transactions/etc.
+    //
+    // Gated on `previous?.user?.id != null` — without it, this also fires
+    // on the very first auth resolution at cold start (previous.user is
+    // null while session-restore is still in flight, then becomes the
+    // restored user), which isn't a user switch at all. Left ungated, that
+    // false-positive called `setUnlocked(false)` right after the user's
+    // biometric unlock succeeded, re-locking the app and triggering a
+    // second fingerprint prompt on every single cold start.
     ref.listen<AuthState>(authControllerProvider, (previous, next) {
-      if (previous?.user?.id != next.user?.id) {
+      if (previous?.user?.id != null && previous?.user?.id != next.user?.id) {
         resetUserScopedProviders(ref);
         ref.read(appUnlockedProvider.notifier).setUnlocked(false);
       }

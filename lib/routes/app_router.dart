@@ -99,10 +99,6 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         ),
       ),
       GoRoute(
-        path: AppRoutes.transactions,
-        builder: (context, state) => const TransactionsScreen(),
-      ),
-      GoRoute(
         path: AppRoutes.addTransaction,
         builder: (context, state) {
           final typeParam = state.uri.queryParameters['type'];
@@ -157,10 +153,6 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.categoryDetailsPattern,
         builder: (context, state) =>
             CategoryDetailsScreen(categoryId: state.pathParameters['id']!),
-      ),
-      GoRoute(
-        path: AppRoutes.reports,
-        builder: (context, state) => const ReportsScreen(),
       ),
       GoRoute(
         path: AppRoutes.changePassword,
@@ -225,6 +217,22 @@ final goRouterProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: AppRoutes.home,
                 builder: (context, state) => const DashboardScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.transactions,
+                builder: (context, state) => const TransactionsScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.reports,
+                builder: (context, state) => const ReportsScreen(),
               ),
             ],
           ),

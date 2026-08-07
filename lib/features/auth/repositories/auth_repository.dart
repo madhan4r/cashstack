@@ -105,6 +105,24 @@ class AuthRepository {
     }
   }
 
+  Future<Result<User>> uploadAvatar(String filePath) async {
+    try {
+      final user = await _apiService.uploadAvatar(filePath);
+      return Result.ok(user.toDomain());
+    } catch (error) {
+      return Result.err(mapExceptionToFailure(error));
+    }
+  }
+
+  Future<Result<User>> removeAvatar() async {
+    try {
+      final user = await _apiService.removeAvatar();
+      return Result.ok(user.toDomain());
+    } catch (error) {
+      return Result.err(mapExceptionToFailure(error));
+    }
+  }
+
   Future<Result<void>> changePassword({
     required String currentPassword,
     required String newPassword,

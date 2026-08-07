@@ -1,27 +1,37 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 
+import '../../../core/config/app_config.dart';
 import '../../../core/extensions/context_extensions.dart';
 import '../../../core/widgets/buttons/app_outlined_button.dart';
 import '../../../core/widgets/cards/app_list_tile.dart';
+import '../../../core/widgets/feedback/app_bottom_sheet.dart';
 import '../../../core/widgets/navigation/app_bar.dart';
 import '../../../routes/app_routes.dart';
 import '../../../services/snackbar_service.dart';
 import '../../auth/providers/auth_controller.dart';
 import '../widgets/edit_name_sheet.dart';
 
-class ProfileScreen extends ConsumerWidget {
+class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
 
-  Future<void> _handleEditName(BuildContext context, WidgetRef ref, String currentName) async {
+  @override
+  ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends ConsumerState<ProfileScreen> {
+  bool _isUpdatingAvatar = false;
+
+  Future<void> _handleEditName(String currentName) async {
     final newName = await showEditNameSheet(context: context, currentName: currentName);
-    if (newName == null || !context.mounted) return;
+    if (newName == null || !mounted) return;
 
     final result = await ref
         .read(authControllerProvider.notifier)
         .updateProfile(fullName: newName);
-    if (!context.mounted) return;
+    if (!mounted) return;
 
     result.when(
       ok: (_) => ref.read(snackbarServiceProvider).showSuccess('Name updated'),
@@ -29,9 +39,75 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
+  Future<void> _handleAvatarTap(bool hasAvatar) async {
+    final action = await showAppBottomSheet<_AvatarAction>(
+      context: context,
+      title: 'Profile Picture',
+      builder: (context) => Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ListTile(
+            leading: const Icon(Icons.photo_library_outlined),
+            title: const Text('Choose from gallery'),
+            onTap: () => Navigator.of(context).pop(_AvatarAction.pick),
+          ),
+          if (hasAvatar)
+            ListTile(
+              leading: const Icon(Icons.delete_outline_rounded),
+              title: const Text('Remove photo'),
+              onTap: () => Navigator.of(context).pop(_AvatarAction.remove),
+            ),
+        ],
+      ),
+    );
+    if (action == null || !mounted) return;
+
+    switch (action) {
+      case _AvatarAction.pick:
+        await _pickAndUploadAvatar();
+      case _AvatarAction.remove:
+        await _removeAvatar();
+    }
+  }
+
+  Future<void> _pickAndUploadAvatar() async {
+    final picked = await ImagePicker().pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 1024,
+      maxHeight: 1024,
+      imageQuality: 85,
+    );
+    if (picked == null || !mounted) return;
+
+    setState(() => _isUpdatingAvatar = true);
+    final result = await ref
+        .read(authControllerProvider.notifier)
+        .uploadAvatar(picked.path);
+    if (!mounted) return;
+    setState(() => _isUpdatingAvatar = false);
+
+    result.when(
+      ok: (_) => ref.read(snackbarServiceProvider).showSuccess('Profile picture updated'),
+      err: (failure) => ref.read(snackbarServiceProvider).showError(failure.message),
+    );
+  }
+
+  Future<void> _removeAvatar() async {
+    setState(() => _isUpdatingAvatar = true);
+    final result = await ref.read(authControllerProvider.notifier).removeAvatar();
+    if (!mounted) return;
+    setState(() => _isUpdatingAvatar = false);
+
+    result.when(
+      ok: (_) => ref.read(snackbarServiceProvider).showSuccess('Profile picture removed'),
+      err: (failure) => ref.read(snackbarServiceProvider).showError(failure.message),
+    );
+  }
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final user = ref.watch(authControllerProvider).user;
+    final avatarUrl = user?.avatarUrl;
 
     return Scaffold(
       appBar: const CashStackAppBar(title: 'Profile', showBackButton: false),
@@ -39,15 +115,48 @@ class ProfileScreen extends ConsumerWidget {
         padding: const EdgeInsets.all(24),
         children: [
           Center(
-            child: Hero(
-              tag: 'profile-avatar',
-              child: CircleAvatar(
-                radius: 36,
-                backgroundColor: context.colors.primaryContainer,
-                child: Icon(
-                  Icons.person_outline,
-                  size: 36,
-                  color: context.colors.onPrimaryContainer,
+            child: GestureDetector(
+              onTap: _isUpdatingAvatar
+                  ? null
+                  : () => _handleAvatarTap(avatarUrl != null),
+              child: Hero(
+                tag: 'profile-avatar',
+                child: Stack(
+                  children: [
+                    CircleAvatar(
+                      radius: 36,
+                      backgroundColor: context.colors.primaryContainer,
+                      backgroundImage: avatarUrl != null
+                          ? NetworkImage('${AppConfig.apiOrigin}$avatarUrl')
+                          : null,
+                      child: _isUpdatingAvatar
+                          ? const CircularProgressIndicator(strokeWidth: 2)
+                          : avatarUrl == null
+                          ? Icon(
+                              Icons.person_outline,
+                              size: 36,
+                              color: context.colors.onPrimaryContainer,
+                            )
+                          : null,
+                    ),
+                    Positioned(
+                      right: 0,
+                      bottom: 0,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: context.colors.primary,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: context.colors.surface, width: 2),
+                        ),
+                        child: Icon(
+                          Icons.camera_alt_rounded,
+                          size: 14,
+                          color: context.colors.onPrimary,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -70,7 +179,7 @@ class ProfileScreen extends ConsumerWidget {
             leading: const Icon(Icons.person_outline_rounded),
             title: 'Edit Name',
             subtitle: user?.fullName,
-            onTap: () => _handleEditName(context, ref, user?.fullName ?? ''),
+            onTap: () => _handleEditName(user?.fullName ?? ''),
           ),
           AppListTile(
             leading: const Icon(Icons.lock_outline_rounded),
@@ -93,3 +202,5 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 }
+
+enum _AvatarAction { pick, remove }
