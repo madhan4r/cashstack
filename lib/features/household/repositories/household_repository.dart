@@ -90,6 +90,17 @@ class HouseholdRepository {
       throw mapExceptionToFailure(e.appException);
     }
   }
+
+  Future<void> setViewMode(HouseholdViewMode mode) async {
+    try {
+      await _dio.patch<Map<String, dynamic>>(
+        '/households/view-mode',
+        data: {'mode': mode.toJson()},
+      );
+    } on DioException catch (e) {
+      throw mapExceptionToFailure(e.appException);
+    }
+  }
 }
 
 final householdRepositoryProvider = Provider<HouseholdRepository>((ref) {

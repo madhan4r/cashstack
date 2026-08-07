@@ -4,11 +4,13 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/widgets/buttons/app_primary_button.dart';
+import '../../../core/widgets/cards/app_card.dart';
 import '../../../core/widgets/cards/app_list_tile.dart';
 import '../../../core/widgets/navigation/app_bar.dart';
 import '../../../routes/app_routes.dart';
 import '../../../services/snackbar_service.dart';
 import '../../auth/providers/auth_controller.dart';
+import '../models/household.dart';
 import '../providers/household_controller.dart';
 import '../providers/pending_invites_controller.dart';
 import '../widgets/invite_member_sheet.dart';
@@ -89,12 +91,13 @@ class HouseholdScreen extends ConsumerWidget {
               Text(household.name, style: Theme.of(context).textTheme.titleLarge),
               const SizedBox(height: AppSpacing.sm),
               Text(
-                '${household.members.length} ${household.members.length == 1 ? 'member' : 'members'} — everyone can see and edit '
-                'everyone else\'s accounts and transactions.',
+                '${household.members.length} ${household.members.length == 1 ? 'member' : 'members'}',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
+              const SizedBox(height: AppSpacing.md),
+              _ViewModeToggle(household: household),
               const SizedBox(height: AppSpacing.md),
               ...household.members.map(
                 (member) => AppListTile(
@@ -116,6 +119,78 @@ class HouseholdScreen extends ConsumerWidget {
             ],
           );
         },
+      ),
+    );
+  }
+}
+
+/// "Combine household data" switch — on (default) pools every member's
+/// accounts/transactions/etc. together everywhere in the app; off shows
+/// only the signed-in user's own, even though they're still a member and
+/// can flip it back at any time. A personal preference, not something that
+/// affects what other members see.
+class _ViewModeToggle extends ConsumerStatefulWidget {
+  final Household household;
+
+  const _ViewModeToggle({required this.household});
+
+  @override
+  ConsumerState<_ViewModeToggle> createState() => _ViewModeToggleState();
+}
+
+class _ViewModeToggleState extends ConsumerState<_ViewModeToggle> {
+  bool _isSaving = false;
+
+  Future<void> _toggle(bool combined) async {
+    setState(() => _isSaving = true);
+    final result = await ref
+        .read(householdControllerProvider.notifier)
+        .setViewMode(combined ? HouseholdViewMode.combined : HouseholdViewMode.separate);
+    if (!mounted) return;
+    setState(() => _isSaving = false);
+
+    result.when(
+      ok: (_) => ref.read(snackbarServiceProvider).showSuccess(
+        combined ? 'Now showing combined household data' : 'Now showing only your own data',
+      ),
+      err: (failure) => ref.read(snackbarServiceProvider).showError(failure.message),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isCombined = widget.household.viewMode == HouseholdViewMode.combined;
+
+    return AppCard(
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Combine Household Data', style: Theme.of(context).textTheme.titleSmall),
+                const SizedBox(height: AppSpacing.xs),
+                Text(
+                  isCombined
+                      ? "You're seeing everyone's accounts and transactions pooled together"
+                      : "You're only seeing your own accounts and transactions",
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          if (_isSaving)
+            const SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          else
+            Switch(value: isCombined, onChanged: _toggle),
+        ],
       ),
     );
   }

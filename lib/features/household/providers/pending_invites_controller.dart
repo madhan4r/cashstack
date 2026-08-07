@@ -26,6 +26,7 @@ class PendingInvitesController extends AsyncNotifier<List<HouseholdInvite>> {
       await refresh();
       if (accept) {
         await ref.read(householdControllerProvider.notifier).refresh();
+        invalidateScopedData(ref);
       }
       return const Result.ok(null);
     } catch (error) {

@@ -4,6 +4,7 @@ import '../../../core/constants/app_radius.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/extensions/context_extensions.dart';
 import '../../../core/utils/color_utils.dart';
+import '../../../core/utils/currency.dart';
 import '../../../core/widgets/cards/account_card.dart';
 import '../models/account_ref.dart';
 
@@ -93,6 +94,7 @@ class _SelectableAccountCard extends StatelessWidget {
         name: account.name,
         typeLabel: account.currency,
         balance: account.balance,
+        currencySymbol: currencySymbolFor(account.currency),
         color: tint,
         onTap: onTap,
       ),
