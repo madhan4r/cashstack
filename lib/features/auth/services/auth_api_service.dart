@@ -128,6 +128,28 @@ class AuthApiService {
     }
   }
 
+  Future<void> registerPushToken(String token) async {
+    try {
+      await _dio.post<Map<String, dynamic>>(
+        '/users/me/push-token',
+        data: {'token': token},
+      );
+    } on DioException catch (e) {
+      throw e.appException;
+    }
+  }
+
+  Future<void> unregisterPushToken(String token) async {
+    try {
+      await _dio.delete<Map<String, dynamic>>(
+        '/users/me/push-token',
+        data: {'token': token},
+      );
+    } on DioException catch (e) {
+      throw e.appException;
+    }
+  }
+
   Future<void> changePassword({
     required String currentPassword,
     required String newPassword,

@@ -6,6 +6,7 @@ import 'core/biometric/biometric_lock_controller.dart';
 import 'core/constants/app_constants.dart';
 import 'core/home_widget/home_widget_launch_listener.dart';
 import 'core/home_widget/home_widget_sync_service.dart';
+import 'core/notifications/push_registration_provider.dart';
 import 'core/session/screenshot_capture.dart';
 import 'core/session/user_scoped_providers.dart';
 import 'core/theme/app_theme.dart';
@@ -40,6 +41,10 @@ class CashStackApp extends ConsumerWidget {
     // above — only meaningful (and only registers platform channels) for
     // a signed-in session on Android.
     if (isAuthenticated) ref.watch(homeWidgetLaunchListenerProvider);
+
+    // Registers/unregisters this device's FCM token with the backend for
+    // the lifetime of the signed-in session — see the provider's own doc.
+    if (isAuthenticated) ref.watch(pushRegistrationProvider);
 
     // Keeps the "Balance & Budget" home-screen widget in sync with
     // whatever the Dashboard last successfully loaded — the widget itself

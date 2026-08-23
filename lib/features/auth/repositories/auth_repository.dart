@@ -123,6 +123,24 @@ class AuthRepository {
     }
   }
 
+  Future<Result<void>> registerPushToken(String token) async {
+    try {
+      await _apiService.registerPushToken(token);
+      return const Result.ok(null);
+    } catch (error) {
+      return Result.err(mapExceptionToFailure(error));
+    }
+  }
+
+  Future<Result<void>> unregisterPushToken(String token) async {
+    try {
+      await _apiService.unregisterPushToken(token);
+      return const Result.ok(null);
+    } catch (error) {
+      return Result.err(mapExceptionToFailure(error));
+    }
+  }
+
   Future<Result<void>> changePassword({
     required String currentPassword,
     required String newPassword,

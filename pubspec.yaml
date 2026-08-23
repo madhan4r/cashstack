@@ -54,6 +54,9 @@ dependencies:
   notification_listener_service: ^1.0.0
   home_widget: ^0.9.3
   image_picker: ^1.2.3
+  cached_network_image: ^3.4.1
+  firebase_core: ^4.13.0
+  firebase_messaging: ^16.5.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

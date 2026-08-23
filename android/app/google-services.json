@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1037906289792",
+    "project_id": "cashstack-60b37",
+    "storage_bucket": "cashstack-60b37.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1037906289792:android:ac2997ffe0d20aee69b265",
+        "android_client_info": {
+          "package_name": "com.example.cashstack"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCi5HEcZRYhxMgufGnmlz_1Jvn3EKIP-0E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

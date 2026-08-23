@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -23,6 +24,7 @@ class ProfileScreen extends ConsumerStatefulWidget {
 
 class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   bool _isUpdatingAvatar = false;
+  String? _failedAvatarUrl;
 
   Future<void> _handleEditName(String currentName) async {
     final newName = await showEditNameSheet(context: context, currentName: currentName);
@@ -128,6 +130,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   Widget build(BuildContext context) {
     final user = ref.watch(authControllerProvider).user;
     final avatarUrl = user?.avatarUrl;
+    final avatarLoadFailed = avatarUrl != null && avatarUrl == _failedAvatarUrl;
 
     return Scaffold(
       appBar: const CashStackAppBar(title: 'Profile', showBackButton: false),
@@ -146,12 +149,22 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     CircleAvatar(
                       radius: 36,
                       backgroundColor: context.colors.primaryContainer,
-                      backgroundImage: avatarUrl != null
-                          ? NetworkImage('${AppConfig.apiOrigin}$avatarUrl')
+                      backgroundImage: avatarUrl != null && !avatarLoadFailed
+                          ? CachedNetworkImageProvider('${AppConfig.apiOrigin}$avatarUrl')
+                          : null,
+                      onBackgroundImageError: avatarUrl != null
+                          ? (_, _) {
+                              // Falls back to the person icon instead of a
+                              // silently blank circle (see profile-picture
+                              // "uploaded but not showing" report).
+                              if (mounted && _failedAvatarUrl != avatarUrl) {
+                                setState(() => _failedAvatarUrl = avatarUrl);
+                              }
+                            }
                           : null,
                       child: _isUpdatingAvatar
                           ? const CircularProgressIndicator(strokeWidth: 2)
-                          : avatarUrl == null
+                          : (avatarUrl == null || avatarLoadFailed)
                           ? Icon(
                               Icons.person_outline,
                               size: 36,
