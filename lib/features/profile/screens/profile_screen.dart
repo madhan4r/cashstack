@@ -49,7 +49,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           ListTile(
             leading: const Icon(Icons.photo_library_outlined),
             title: const Text('Choose from gallery'),
-            onTap: () => Navigator.of(context).pop(_AvatarAction.pick),
+            onTap: () => Navigator.of(context).pop(_AvatarAction.pickFromGallery),
+          ),
+          ListTile(
+            leading: const Icon(Icons.photo_camera_outlined),
+            title: const Text('Take a photo'),
+            onTap: () => Navigator.of(context).pop(_AvatarAction.pickFromCamera),
           ),
           if (hasAvatar)
             ListTile(
@@ -63,20 +68,35 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     if (action == null || !mounted) return;
 
     switch (action) {
-      case _AvatarAction.pick:
-        await _pickAndUploadAvatar();
+      case _AvatarAction.pickFromGallery:
+        await _pickAndUploadAvatar(ImageSource.gallery);
+      case _AvatarAction.pickFromCamera:
+        await _pickAndUploadAvatar(ImageSource.camera);
       case _AvatarAction.remove:
         await _removeAvatar();
     }
   }
 
-  Future<void> _pickAndUploadAvatar() async {
-    final picked = await ImagePicker().pickImage(
-      source: ImageSource.gallery,
-      maxWidth: 1024,
-      maxHeight: 1024,
-      imageQuality: 85,
-    );
+  Future<void> _pickAndUploadAvatar(ImageSource source) async {
+    final XFile? picked;
+    try {
+      picked = await ImagePicker().pickImage(
+        source: source,
+        maxWidth: 1024,
+        maxHeight: 1024,
+        imageQuality: 85,
+      );
+    } catch (error) {
+      if (!mounted) return;
+      ref
+          .read(snackbarServiceProvider)
+          .showError(
+            source == ImageSource.camera
+                ? "Couldn't access the camera"
+                : "Couldn't open the gallery",
+          );
+      return;
+    }
     if (picked == null || !mounted) return;
 
     setState(() => _isUpdatingAvatar = true);
@@ -203,4 +223,4 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 }
 
-enum _AvatarAction { pick, remove }
+enum _AvatarAction { pickFromGallery, pickFromCamera, remove }

@@ -25,10 +25,10 @@ class RefreshTokenInterceptor extends Interceptor {
 
   RefreshTokenInterceptor({
     required this._dio,
-    required SecureStorageService storage,
+    required this._storage,
     required this._authEventBus,
     this._refreshPath = '/auth/refresh',
-  }) : _storage = storage;
+  });
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) async {

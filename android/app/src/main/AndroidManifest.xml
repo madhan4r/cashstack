@@ -1,6 +1,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <uses-permission android:name="android.permission.USE_BIOMETRIC"/>
+    <!-- "Take a photo" for the profile picture, see ProfileScreen. -->
+    <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-feature android:name="android.hardware.camera" android:required="false"/>
     <application
         android:label="cashstack"
         android:name="${applicationName}"
@@ -58,16 +61,6 @@
                 <action android:name="android.service.notification.NotificationListenerService"/>
             </intent-filter>
         </service>
-        <!-- Manifest-registered twin of the notification_listener_service plugin's own
-             (process-alive-only) event forwarding, so bank notifications still get captured
-             when Android has killed the app — see NativeNotificationCaptureReceiver's doc. -->
-        <receiver
-            android:name=".NativeNotificationCaptureReceiver"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="slayer.notification.listener.service.intent"/>
-            </intent-filter>
-        </receiver>
         <!-- Home-screen widgets, see Settings > Home Screen Widgets. -->
         <receiver
             android:name=".BalanceWidgetProvider"

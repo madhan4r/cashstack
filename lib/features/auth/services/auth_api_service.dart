@@ -90,7 +90,17 @@ class AuthApiService {
       final response = await _dio.post<Map<String, dynamic>>(
         '/users/me/avatar',
         data: FormData.fromMap({
-          'avatar': await MultipartFile.fromFile(filePath),
+          // Explicit contentType rather than letting Dio guess one from the
+          // file extension — the picker (see ProfileScreen) always
+          // re-encodes to JPEG when resizing/compressing, but the cached
+          // file path it hands back doesn't necessarily get a matching
+          // ".jpg" extension, so extension-based sniffing can send the
+          // wrong Content-Type and get rejected by the backend's mimetype
+          // check even though the bytes are a perfectly valid JPEG.
+          'avatar': await MultipartFile.fromFile(
+            filePath,
+            contentType: DioMediaType('image', 'jpeg'),
+          ),
         }),
       );
       final apiResponse = ApiResponse.fromJson(
