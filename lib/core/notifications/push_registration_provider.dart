@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
@@ -22,9 +24,15 @@ final pushRegistrationProvider = Provider<void>((ref) {
   if (!isAuthenticated) return;
 
   String? registeredToken;
+  StreamSubscription<String>? tokenRefreshSub;
+  StreamSubscription<RemoteMessage>? foregroundMessageSub;
 
   Future<void> setUp() async {
     try {
+      // Must fully resolve before touching FirebaseMessaging.instance below
+      // — that getter throws `[core/no-app]` if the default app isn't up
+      // yet, which it reliably wasn't when this used to fire the two
+      // `.listen()` calls synchronously ahead of this await.
       await Firebase.initializeApp();
     } catch (error) {
       debugPrint('Firebase not configured — push notifications disabled: $error');
@@ -32,6 +40,24 @@ final pushRegistrationProvider = Provider<void>((ref) {
     }
 
     final messaging = FirebaseMessaging.instance;
+
+    tokenRefreshSub = messaging.onTokenRefresh.listen((newToken) async {
+      registeredToken = newToken;
+      await ref.read(authRepositoryProvider).registerPushToken(newToken);
+    });
+
+    foregroundMessageSub = FirebaseMessaging.onMessage.listen((message) {
+      final notification = message.notification;
+      if (notification == null) return;
+      ref
+          .read(notificationServiceProvider)
+          .showNow(
+            id: message.hashCode,
+            title: notification.title ?? 'CashStack',
+            body: notification.body ?? '',
+          );
+    });
+
     final settings = await messaging.requestPermission();
     if (settings.authorizationStatus == AuthorizationStatus.denied) return;
 
@@ -42,30 +68,11 @@ final pushRegistrationProvider = Provider<void>((ref) {
     }
   }
 
-  final tokenRefreshSub = FirebaseMessaging.instance.onTokenRefresh.listen((
-    newToken,
-  ) async {
-    registeredToken = newToken;
-    await ref.read(authRepositoryProvider).registerPushToken(newToken);
-  });
-
-  final foregroundMessageSub = FirebaseMessaging.onMessage.listen((message) {
-    final notification = message.notification;
-    if (notification == null) return;
-    ref
-        .read(notificationServiceProvider)
-        .showNow(
-          id: message.hashCode,
-          title: notification.title ?? 'CashStack',
-          body: notification.body ?? '',
-        );
-  });
-
   setUp();
 
   ref.onDispose(() {
-    tokenRefreshSub.cancel();
-    foregroundMessageSub.cancel();
+    tokenRefreshSub?.cancel();
+    foregroundMessageSub?.cancel();
     final token = registeredToken;
     if (token != null) {
       // Best-effort — the user is signing out, so a failure here just means

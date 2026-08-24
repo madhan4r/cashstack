@@ -152,7 +152,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       backgroundImage: avatarUrl != null && !avatarLoadFailed
                           ? CachedNetworkImageProvider('${AppConfig.apiOrigin}$avatarUrl')
                           : null,
-                      onBackgroundImageError: avatarUrl != null
+                      onBackgroundImageError: avatarUrl != null && !avatarLoadFailed
                           ? (_, _) {
                               // Falls back to the person icon instead of a
                               // silently blank circle (see profile-picture

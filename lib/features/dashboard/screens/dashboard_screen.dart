@@ -37,7 +37,9 @@ class DashboardScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final dashboardAsync = ref.watch(dashboardControllerProvider);
-    final userName = ref.watch(authControllerProvider).user?.fullName;
+    final user = ref.watch(authControllerProvider).user;
+    final userName = user?.fullName;
+    final avatarUrl = user?.avatarUrl;
     final currencySymbol = ref.watch(preferredCurrencySymbolProvider);
 
     return Scaffold(
@@ -49,10 +51,12 @@ class DashboardScreen extends ConsumerWidget {
               constraints: const BoxConstraints(maxWidth: _maxContentWidth),
               child: switch (dashboardAsync) {
                 AsyncData(:final value) => value.hasNoActivity
-                    ? _EmptyDashboard(header: DashboardHeader(fullName: userName))
+                    ? _EmptyDashboard(
+                        header: DashboardHeader(fullName: userName, avatarUrl: avatarUrl),
+                      )
                     : _DashboardContent(
                         data: value,
-                        header: DashboardHeader(fullName: userName),
+                        header: DashboardHeader(fullName: userName, avatarUrl: avatarUrl),
                         currencySymbol: currencySymbol,
                       ),
                 AsyncError(:final error) => ScrollableSingleChild(

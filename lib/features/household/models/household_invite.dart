@@ -1,12 +1,13 @@
 import 'package:equatable/equatable.dart';
 
-enum HouseholdInviteStatus { pending, accepted, declined, cancelled;
+enum HouseholdInviteStatus { pending, accepted, declined, cancelled, expired;
 
   factory HouseholdInviteStatus.fromJson(String value) {
     return switch (value) {
       'PENDING' => HouseholdInviteStatus.pending,
       'ACCEPTED' => HouseholdInviteStatus.accepted,
       'DECLINED' => HouseholdInviteStatus.declined,
+      'EXPIRED' => HouseholdInviteStatus.expired,
       _ => HouseholdInviteStatus.cancelled,
     };
   }

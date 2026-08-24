@@ -1,6 +1,8 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/config/app_config.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/widgets/feedback/app_toast.dart';
 import '../../../core/extensions/context_extensions.dart';
@@ -9,10 +11,18 @@ import '../../../routes/app_routes.dart';
 /// Dashboard's top banner: a time-of-day greeting, the user's profile
 /// avatar (tapping it jumps to the Profile tab), and a notifications
 /// entry point.
-class DashboardHeader extends StatelessWidget {
+class DashboardHeader extends StatefulWidget {
   final String? fullName;
+  final String? avatarUrl;
 
-  const DashboardHeader({super.key, this.fullName});
+  const DashboardHeader({super.key, this.fullName, this.avatarUrl});
+
+  @override
+  State<DashboardHeader> createState() => _DashboardHeaderState();
+}
+
+class _DashboardHeaderState extends State<DashboardHeader> {
+  String? _failedAvatarUrl;
 
   String get _greeting {
     final hour = DateTime.now().hour;
@@ -23,7 +33,9 @@ class DashboardHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final firstName = fullName?.trim().split(' ').first;
+    final firstName = widget.fullName?.trim().split(' ').first;
+    final avatarUrl = widget.avatarUrl;
+    final avatarLoadFailed = avatarUrl != null && avatarUrl == _failedAvatarUrl;
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -62,10 +74,22 @@ class DashboardHeader extends StatelessWidget {
             child: CircleAvatar(
               radius: 22,
               backgroundColor: context.colors.primaryContainer,
-              child: Icon(
-                Icons.person_outline_rounded,
-                color: context.colors.onPrimaryContainer,
-              ),
+              backgroundImage: avatarUrl != null && !avatarLoadFailed
+                  ? CachedNetworkImageProvider('${AppConfig.apiOrigin}$avatarUrl')
+                  : null,
+              onBackgroundImageError: avatarUrl != null && !avatarLoadFailed
+                  ? (_, _) {
+                      if (mounted && _failedAvatarUrl != avatarUrl) {
+                        setState(() => _failedAvatarUrl = avatarUrl);
+                      }
+                    }
+                  : null,
+              child: avatarUrl == null || avatarLoadFailed
+                  ? Icon(
+                      Icons.person_outline_rounded,
+                      color: context.colors.onPrimaryContainer,
+                    )
+                  : null,
             ),
           ),
         ),

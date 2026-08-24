@@ -16,7 +16,14 @@ class AppConfig {
   /// origin (e.g. `/uploads/avatars/...`), not under the versioned API path.
   static String get apiOrigin {
     final uri = Uri.parse(apiBaseUrl);
-    return uri.replace(path: '', query: '').toString();
+    // `query: ''` (as opposed to omitting it) sets an explicit-but-empty
+    // query component, so `Uri.toString()` renders a trailing "?" even
+    // though there's nothing after it — e.g. "https://host?". Concatenating
+    // "/uploads/avatars/x.jpg" onto that turns the whole path into part of
+    // the query string, and the backend 404s on `GET /?/uploads/...`. Since
+    // apiBaseUrl never has a query component to begin with, just clearing
+    // path is enough.
+    return uri.replace(path: '').toString();
   }
 
   static const bool enableNetworkLogging = bool.fromEnvironment(
