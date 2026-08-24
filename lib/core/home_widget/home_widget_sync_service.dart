@@ -17,6 +17,7 @@ class HomeWidgetSyncService {
     required double monthlyExpense,
     required double? monthlyBudget,
     required String currencySymbol,
+    int unreadNotificationCount = 0,
   }) async {
     if (!Platform.isAndroid) return;
 
@@ -42,6 +43,18 @@ class HomeWidgetSyncService {
         'budget_label',
         '${monthlyExpense.toCurrency(symbol: currencySymbol, decimalDigits: 0)} of '
             '${monthlyBudget.toCurrency(symbol: currencySymbol, decimalDigits: 0)}',
+      );
+    }
+
+    final hasUnreadNotifications = unreadNotificationCount > 0;
+    await HomeWidget.saveWidgetData<bool>(
+      'has_unread_notifications',
+      hasUnreadNotifications,
+    );
+    if (hasUnreadNotifications) {
+      await HomeWidget.saveWidgetData<String>(
+        'unread_notification_count',
+        unreadNotificationCount > 9 ? '9+' : '$unreadNotificationCount',
       );
     }
 

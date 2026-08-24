@@ -8,14 +8,26 @@ import '../../../core/widgets/cards/app_card.dart';
 import '../../../shared/models/transaction_kind.dart';
 import '../models/upcoming_occurrence.dart';
 
-/// A list of upcoming scheduled transactions — used both on the Add/Edit
-/// form (a live preview of the schedule being configured, if provided
-/// standalone via [entries]) and the list screen's "Upcoming" section.
+/// A list of upcoming scheduled transactions — used by the Recurring list
+/// screen's "Upcoming" tab.
 class SchedulePreview extends StatelessWidget {
   final List<UpcomingOccurrence> entries;
   final String currencySymbol;
 
-  const SchedulePreview({super.key, required this.entries, this.currencySymbol = '\$'});
+  /// Resolves the currency symbol for one entry's own account — takes
+  /// precedence over [currencySymbol] when provided, since a list spanning
+  /// several accounts (e.g. the list screen's "Upcoming" tab) can't use one
+  /// flat symbol for everything. The form screen's live preview omits this
+  /// (every entry there is for the single account currently being
+  /// configured) and just uses [currencySymbol].
+  final String Function(UpcomingOccurrence entry)? symbolFor;
+
+  const SchedulePreview({
+    super.key,
+    required this.entries,
+    this.currencySymbol = '\$',
+    this.symbolFor,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +53,10 @@ class SchedulePreview extends StatelessWidget {
         children: [
           for (var i = 0; i < entries.length; i++) ...[
             if (i > 0) const SizedBox(height: AppSpacing.md),
-            _PreviewRow(entry: entries[i], currencySymbol: currencySymbol),
+            _PreviewRow(
+              entry: entries[i],
+              currencySymbol: symbolFor?.call(entries[i]) ?? currencySymbol,
+            ),
           ],
         ],
       ),

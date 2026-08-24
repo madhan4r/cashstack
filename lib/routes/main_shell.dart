@@ -20,11 +20,6 @@ const _destinations = [
     label: 'Reports',
   ),
   AppNavDestination(
-    icon: Icons.person_outline_rounded,
-    selectedIcon: Icons.person_rounded,
-    label: 'Profile',
-  ),
-  AppNavDestination(
     icon: Icons.settings_outlined,
     selectedIcon: Icons.settings_rounded,
     label: 'Settings',
@@ -32,8 +27,9 @@ const _destinations = [
 ];
 
 /// Bottom-navigation shell for the authenticated area of the app (Home,
-/// Transactions, Reports, Profile, Settings). Used as the `builder` of a
-/// [StatefulShellRoute] so each tab keeps its own navigation stack.
+/// Transactions, Reports, Settings). Used as the `builder` of a
+/// [StatefulShellRoute] so each tab keeps its own navigation stack — Profile
+/// is reached from within Settings instead of its own tab.
 class MainShell extends StatelessWidget {
   final StatefulNavigationShell navigationShell;
 

@@ -67,7 +67,7 @@ class _DashboardHeaderState extends State<DashboardHeader> {
         const _NotificationButton(),
         const SizedBox(width: AppSpacing.sm),
         GestureDetector(
-          onTap: () => context.go(AppRoutes.profile),
+          onTap: () => context.push(AppRoutes.profile),
           child: Hero(
             tag: 'profile-avatar',
             child: CircleAvatar(

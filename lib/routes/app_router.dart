@@ -12,6 +12,8 @@ import '../core/home_widget/home_widget_screen.dart';
 import '../features/accounts/screens/screens.dart';
 import '../features/household/screens/household_screen.dart';
 import '../features/household/screens/pending_invites_screen.dart';
+import '../features/export/screens/export_screen.dart';
+import '../features/notifications/screens/notification_preferences_screen.dart';
 import '../features/notifications/screens/notifications_screen.dart';
 import '../features/budget/screens/category_budgets_screen.dart';
 import '../features/categories/screens/screens.dart';
@@ -156,6 +158,10 @@ final goRouterProvider = Provider<GoRouter>((ref) {
             CategoryDetailsScreen(categoryId: state.pathParameters['id']!),
       ),
       GoRoute(
+        path: AppRoutes.profile,
+        builder: (context, state) => const ProfileScreen(),
+      ),
+      GoRoute(
         path: AppRoutes.changePassword,
         builder: (context, state) => const ChangePasswordScreen(),
       ),
@@ -166,6 +172,14 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.notifications,
         builder: (context, state) => const NotificationsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.notificationPreferences,
+        builder: (context, state) => const NotificationPreferencesScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.exportData,
+        builder: (context, state) => const ExportScreen(),
       ),
       GoRoute(
         path: AppRoutes.detectedTransactions,
@@ -238,14 +252,6 @@ final goRouterProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: AppRoutes.reports,
                 builder: (context, state) => const ReportsScreen(),
-              ),
-            ],
-          ),
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: AppRoutes.profile,
-                builder: (context, state) => const ProfileScreen(),
               ),
             ],
           ),

@@ -49,6 +49,8 @@ class AppRoutes {
   static const String editRecurringPattern = '/recurring/:id/edit';
 
   static const String notifications = '/notifications';
+  static const String notificationPreferences = '/notifications/preferences';
+  static const String exportData = '/export';
   static const String detectedTransactions = '/detected-transactions';
   static const String homeScreenWidgets = '/home-screen-widgets';
 

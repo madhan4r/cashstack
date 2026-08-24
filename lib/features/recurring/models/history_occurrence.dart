@@ -9,6 +9,7 @@ class HistoryOccurrence extends Equatable {
   final String recurringTransactionId;
   final String name;
   final double amount;
+  final String accountId;
   final DateTime dueDate;
   final OccurrenceStatus status;
   final String? transactionId;
@@ -18,6 +19,7 @@ class HistoryOccurrence extends Equatable {
     required this.recurringTransactionId,
     required this.name,
     required this.amount,
+    required this.accountId,
     required this.dueDate,
     required this.status,
     this.transactionId,
@@ -29,6 +31,7 @@ class HistoryOccurrence extends Equatable {
       recurringTransactionId: json['recurringTransactionId'] as String,
       name: json['name'] as String,
       amount: (json['amount'] as num).toDouble(),
+      accountId: json['accountId'] as String,
       dueDate: DateTime.parse(json['dueDate'] as String).toLocal(),
       status: OccurrenceStatus.fromJson(json['status'] as String),
       transactionId: json['transactionId'] as String?,
@@ -41,6 +44,7 @@ class HistoryOccurrence extends Equatable {
     recurringTransactionId,
     name,
     amount,
+    accountId,
     dueDate,
     status,
     transactionId,

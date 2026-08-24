@@ -103,11 +103,22 @@ class SettingsScreen extends ConsumerWidget {
     final biometricAvailable = ref.watch(biometricAvailableProvider);
     final smartDetectionEnabled = ref.watch(smartDetectionEnabledProvider);
     final household = ref.watch(householdControllerProvider).value;
+    final user = ref.watch(authControllerProvider).user;
 
     return Scaffold(
       appBar: const CashStackAppBar(title: 'Settings', showBackButton: false),
       body: ListView(
         children: [
+          AppListTile(
+            leading: const Icon(Icons.person_outline_rounded),
+            title: user?.fullName ?? 'Profile',
+            subtitle: user?.email,
+            onTap: () => context.push(AppRoutes.profile),
+          ),
+          const Padding(
+            padding: EdgeInsets.fromLTRB(16, 8, 16, 8),
+            child: Divider(),
+          ),
           AppListTile(
             leading: const Icon(Icons.account_balance_wallet_outlined),
             title: 'Accounts',
@@ -137,6 +148,12 @@ class SettingsScreen extends ConsumerWidget {
             title: 'Savings Goals',
             subtitle: 'Track progress toward what you\'re saving for',
             onTap: () => context.push(AppRoutes.savingsGoals),
+          ),
+          AppListTile(
+            leading: const Icon(Icons.file_download_outlined),
+            title: 'Export & Backup',
+            subtitle: 'Download your transactions or a full data backup',
+            onTap: () => context.push(AppRoutes.exportData),
           ),
           AppListTile(
             leading: const Icon(Icons.groups_outlined),
@@ -207,6 +224,12 @@ class SettingsScreen extends ConsumerWidget {
               value: notificationsEnabled,
               onChanged: (value) => _toggleNotifications(ref, value),
             ),
+          ),
+          AppListTile(
+            leading: const Icon(Icons.tune_rounded),
+            title: 'Notification Preferences',
+            subtitle: 'Choose which alerts you receive',
+            onTap: () => context.push(AppRoutes.notificationPreferences),
           ),
           const AppListTile(
             leading: Icon(Icons.language_outlined),

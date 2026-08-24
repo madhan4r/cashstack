@@ -7,15 +7,14 @@ import 'core/constants/app_constants.dart';
 import 'core/home_widget/home_widget_launch_listener.dart';
 import 'core/home_widget/home_widget_sync_service.dart';
 import 'core/notifications/push_registration_provider.dart';
-import 'core/session/screenshot_capture.dart';
 import 'core/session/user_scoped_providers.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_mode_controller.dart';
-import 'core/widgets/misc/feedback_launcher.dart';
 import 'features/auth/providers/auth_controller.dart';
 import 'features/auth/providers/auth_state.dart';
 import 'features/auth/providers/preferred_currency_provider.dart';
 import 'features/dashboard/providers/dashboard_controller.dart';
+import 'features/notifications/providers/notifications_controller.dart';
 import 'features/transaction_detection/providers/notification_detection_listener.dart';
 import 'routes/app_router.dart';
 import 'services/snackbar_service.dart';
@@ -28,7 +27,6 @@ class CashStackApp extends ConsumerWidget {
     final router = ref.watch(goRouterProvider);
     final snackbarService = ref.watch(snackbarServiceProvider);
     final themeMode = ref.watch(themeModeControllerProvider);
-    final boundaryKey = ref.watch(screenshotBoundaryKeyProvider);
     final isAuthenticated = ref.watch(authControllerProvider).isAuthenticated;
 
     // Keeps the bank-notification subscription alive (see the provider's
@@ -54,8 +52,8 @@ class CashStackApp extends ConsumerWidget {
     // would fetch the dashboard (a live network call) before the user is
     // even signed in — including at cold start on the splash screen.
     if (isAuthenticated) {
-      ref.listen(dashboardControllerProvider, (previous, next) {
-        final data = next.value;
+      void syncWidget() {
+        final data = ref.read(dashboardControllerProvider).value;
         if (data == null) return;
         homeWidgetSyncService.syncDashboard(
           balance: data.currentBalance,
@@ -63,7 +61,18 @@ class CashStackApp extends ConsumerWidget {
           monthlyExpense: data.monthlyExpense,
           monthlyBudget: data.monthlyBudget,
           currencySymbol: ref.read(preferredCurrencySymbolProvider),
+          unreadNotificationCount: ref.read(unreadNotificationCountProvider),
         );
+      }
+
+      ref.listen(dashboardControllerProvider, (previous, next) {
+        if (next.value != null) syncWidget();
+      });
+      // Also re-syncs on its own — e.g. marking a notification read should
+      // clear the widget's badge without waiting for the next dashboard
+      // refresh.
+      ref.listen(unreadNotificationCountProvider, (previous, next) {
+        syncWidget();
       });
     }
 
@@ -97,19 +106,7 @@ class CashStackApp extends ConsumerWidget {
       routerConfig: router,
       builder: (context, child) {
         if (child == null) return const SizedBox.shrink();
-        return AppLockGate(
-          child: Stack(
-            children: [
-              RepaintBoundary(key: boundaryKey, child: child),
-              if (isAuthenticated)
-                Positioned(
-                  left: 0,
-                  bottom: 0,
-                  child: FeedbackLauncher(boundaryKey: boundaryKey),
-                ),
-            ],
-          ),
-        );
+        return AppLockGate(child: child);
       },
     );
   }

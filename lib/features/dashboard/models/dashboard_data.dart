@@ -1,6 +1,7 @@
 import 'category_spending.dart';
 import 'dashboard_transaction.dart';
 import 'monthly_trend_point.dart';
+import 'spending_insight.dart';
 
 /// The full `GET /dashboard` response. Mirrors the backend's
 /// `DashboardDataDto`.
@@ -18,6 +19,7 @@ class DashboardData {
 
   final List<DashboardTransaction> recentTransactions;
   final List<CategorySpending> expenseByCategory;
+  final List<SpendingInsight> spendingInsights;
   final List<MonthlyTrendPoint> monthlyTrend;
 
   const DashboardData({
@@ -29,6 +31,7 @@ class DashboardData {
     required this.budgetRemaining,
     required this.recentTransactions,
     required this.expenseByCategory,
+    required this.spendingInsights,
     required this.monthlyTrend,
   });
 
@@ -49,6 +52,9 @@ class DashboardData {
           .toList(),
       expenseByCategory: (json['expenseByCategory'] as List<dynamic>)
           .map((e) => CategorySpending.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      spendingInsights: (json['spendingInsights'] as List<dynamic>? ?? [])
+          .map((e) => SpendingInsight.fromJson(e as Map<String, dynamic>))
           .toList(),
       monthlyTrend: (json['monthlyTrend'] as List<dynamic>)
           .map((e) => MonthlyTrendPoint.fromJson(e as Map<String, dynamic>))

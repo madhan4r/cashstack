@@ -9,6 +9,7 @@ import '../../../core/widgets/misc/app_fab.dart';
 import '../../../core/widgets/misc/scrollable_single_child.dart';
 import '../../../core/widgets/navigation/app_bar.dart';
 import '../../../routes/app_routes.dart';
+import '../../../core/utils/currency.dart';
 import '../../../services/snackbar_service.dart';
 import '../../auth/providers/preferred_currency_provider.dart';
 import '../../transactions/providers/reference_data_provider.dart';
@@ -142,7 +143,9 @@ class _SchedulesTab extends ConsumerWidget {
                         categoryIcon: category?.icon,
                         categoryColor: category?.color,
                         accountName: account?.name,
-                        currencySymbol: currencySymbol,
+                        currencySymbol: account != null
+                            ? currencySymbolFor(account.currency)
+                            : currencySymbol,
                         onTap: () => context.push(AppRoutes.editRecurring(r.id)),
                         onPause: () => _handlePause(context, ref, r),
                         onResume: () => _handleResume(context, ref, r),
@@ -225,6 +228,7 @@ class _UpcomingTab extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final upcomingAsync = ref.watch(upcomingOccurrencesProvider(30));
     final currencySymbol = ref.watch(preferredCurrencySymbolProvider);
+    final referenceDataAsync = ref.watch(referenceDataProvider);
 
     return RefreshIndicator(
       onRefresh: () async => ref.invalidate(upcomingOccurrencesProvider(30)),
@@ -232,7 +236,17 @@ class _UpcomingTab extends ConsumerWidget {
         data: (entries) => ScrollableSingleChild(
           child: Padding(
             padding: const EdgeInsets.all(AppSpacing.md),
-            child: SchedulePreview(entries: entries, currencySymbol: currencySymbol),
+            child: SchedulePreview(
+              entries: entries,
+              currencySymbol: currencySymbol,
+              symbolFor: (entry) {
+                final account =
+                    referenceDataAsync.value?.accountsById[entry.accountId];
+                return account != null
+                    ? currencySymbolFor(account.currency)
+                    : currencySymbol;
+              },
+            ),
           ),
         ),
         loading: () => const ScrollableSingleChild(child: RecurringSkeleton()),
@@ -294,6 +308,7 @@ class _HistoryList extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(historyControllerProvider(status));
     final currencySymbol = ref.watch(preferredCurrencySymbolProvider);
+    final referenceDataAsync = ref.watch(referenceDataProvider);
 
     return RefreshIndicator(
       onRefresh: () => ref.read(historyControllerProvider(status).notifier).refresh(),
@@ -330,10 +345,17 @@ class _HistoryList extends ConsumerWidget {
               physics: const AlwaysScrollableScrollPhysics(),
               itemCount: state.items.length,
               separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.sm),
-              itemBuilder: (context, index) => HistoryTile(
-                occurrence: state.items[index],
-                currencySymbol: currencySymbol,
-              ),
+              itemBuilder: (context, index) {
+                final occurrence = state.items[index];
+                final account =
+                    referenceDataAsync.value?.accountsById[occurrence.accountId];
+                return HistoryTile(
+                  occurrence: occurrence,
+                  currencySymbol: account != null
+                      ? currencySymbolFor(account.currency)
+                      : currencySymbol,
+                );
+              },
             ),
           ),
       },

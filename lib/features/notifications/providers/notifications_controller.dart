@@ -1,35 +1,100 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../models/app_notification.dart';
+import '../../../core/error/exception_mapper.dart';
 import '../repositories/notifications_repository.dart';
+import 'notifications_list_state.dart';
 
-/// The current user's notifications, newest first — backs both the
-/// notification center screen and the dashboard bell's unread badge (see
-/// [unreadNotificationCountProvider]), same "derive the count from the list
-/// state" pattern as [pendingInvitesCountProvider].
-class NotificationsController extends AsyncNotifier<List<AppNotification>> {
+const _pageSize = 30;
+
+/// Drives the notification center: initial load, infinite scroll
+/// (`loadNextPage`), and pull-to-refresh (`refresh`) — mirrors
+/// `TransactionsListController`'s shape.
+class NotificationsController extends Notifier<NotificationsListState> {
   @override
-  Future<List<AppNotification>> build() async {
-    final result = await ref.watch(notificationsRepositoryProvider).getNotifications();
-    return result.items;
+  NotificationsListState build() {
+    unawaited(_loadFirstPage());
+    return const NotificationsListState();
+  }
+
+  Future<void> _loadFirstPage() async {
+    final repository = ref.read(notificationsRepositoryProvider);
+    try {
+      final result = await repository.getNotifications(page: 1);
+      state = state.copyWith(
+        items: result.items,
+        meta: result.meta,
+        status: NotificationsListStatus.loaded,
+        clearError: true,
+      );
+    } catch (error) {
+      state = state.copyWith(
+        status: NotificationsListStatus.error,
+        error: mapExceptionToFailure(error),
+      );
+    }
+  }
+
+  Future<void> loadNextPage() async {
+    if (state.status != NotificationsListStatus.loaded || !state.hasMore) {
+      return;
+    }
+
+    state = state.copyWith(status: NotificationsListStatus.loadingMore);
+    final repository = ref.read(notificationsRepositoryProvider);
+    final nextPage = (state.meta?.page ?? 0) + 1;
+
+    try {
+      final result = await repository.getNotifications(page: nextPage);
+      state = state.copyWith(
+        items: [...state.items, ...result.items],
+        meta: result.meta,
+        status: NotificationsListStatus.loaded,
+      );
+    } catch (error) {
+      // Keep the existing items visible; surface the failure separately.
+      state = state.copyWith(
+        status: NotificationsListStatus.loaded,
+        backgroundError: mapExceptionToFailure(error),
+      );
+    }
   }
 
   Future<void> refresh() async {
+    state = state.copyWith(status: NotificationsListStatus.refreshing);
     final repository = ref.read(notificationsRepositoryProvider);
-    state = await AsyncValue.guard(() async {
-      final result = await repository.getNotifications();
-      return result.items;
-    });
+
+    try {
+      final result = await repository.getNotifications(page: 1);
+      state = state.copyWith(
+        items: result.items,
+        meta: result.meta,
+        status: NotificationsListStatus.loaded,
+        clearError: true,
+        clearBackgroundError: true,
+      );
+    } catch (error) {
+      state = state.copyWith(
+        status: NotificationsListStatus.loaded,
+        backgroundError: mapExceptionToFailure(error),
+      );
+    }
+  }
+
+  void dismissBackgroundError() {
+    state = state.copyWith(clearBackgroundError: true);
   }
 
   Future<void> markRead(String id) async {
-    final current = state.value;
-    if (current == null) return;
+    final items = state.items;
+    final index = items.indexWhere((n) => n.id == id);
+    if (index == -1 || items[index].read) return;
 
     // Optimistic — the notification center should feel instant, and a
     // failed mark-read just means the item reverts on next refresh.
-    state = AsyncData([
-      for (final n in current)
+    state = state.copyWith(items: [
+      for (final n in items)
         if (n.id == id) n.copyWith(read: true) else n,
     ]);
 
@@ -41,10 +106,11 @@ class NotificationsController extends AsyncNotifier<List<AppNotification>> {
   }
 
   Future<void> markAllRead() async {
-    final current = state.value;
-    if (current == null) return;
+    if (state.items.every((n) => n.read)) return;
 
-    state = AsyncData([for (final n in current) n.copyWith(read: true)]);
+    state = state.copyWith(
+      items: [for (final n in state.items) n.copyWith(read: true)],
+    );
 
     try {
       await ref.read(notificationsRepositoryProvider).markAllRead();
@@ -55,11 +121,10 @@ class NotificationsController extends AsyncNotifier<List<AppNotification>> {
 }
 
 final notificationsControllerProvider =
-    AsyncNotifierProvider<NotificationsController, List<AppNotification>>(
+    NotifierProvider<NotificationsController, NotificationsListState>(
       NotificationsController.new,
     );
 
 final unreadNotificationCountProvider = Provider<int>((ref) {
-  final notifications = ref.watch(notificationsControllerProvider).value;
-  return notifications?.where((n) => !n.read).length ?? 0;
+  return ref.watch(notificationsControllerProvider).unreadCount;
 });

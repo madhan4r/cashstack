@@ -39,6 +39,18 @@ class BalanceWidgetProvider : HomeWidgetProvider() {
                 widgetData.getString("expense_display", null) ?: "—",
             )
 
+            val hasUnreadNotifications =
+                widgetData.getBoolean("has_unread_notifications", false)
+            if (hasUnreadNotifications) {
+              setViewVisibility(R.id.widget_notification_badge, View.VISIBLE)
+              setTextViewText(
+                  R.id.widget_notification_badge,
+                  widgetData.getString("unread_notification_count", null) ?: "",
+              )
+            } else {
+              setViewVisibility(R.id.widget_notification_badge, View.GONE)
+            }
+
             val hasBudget = widgetData.getBoolean("has_budget", false)
             if (hasBudget) {
               setViewVisibility(R.id.widget_budget_section, View.VISIBLE)

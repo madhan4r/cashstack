@@ -26,6 +26,7 @@ import '../widgets/dashboard_skeleton.dart';
 import '../widgets/dashboard_transaction_tile.dart';
 import '../widgets/monthly_trend_chart_card.dart';
 import '../widgets/quick_actions_grid.dart';
+import '../widgets/spending_insights_card.dart';
 import '../widgets/staggered_entrance.dart';
 
 const _maxContentWidth = 640.0;
@@ -135,6 +136,10 @@ class _DashboardContent extends StatelessWidget {
         const DetectedTransactionsBanner(),
         const SizedBox(height: AppSpacing.sm),
         const PendingHouseholdInviteBanner(),
+        if (data.spendingInsights.isNotEmpty) ...[
+          const SizedBox(height: AppSpacing.sm),
+          SpendingInsightsCard(insights: data.spendingInsights),
+        ],
         _sectionGap,
         StaggeredEntrance(
           delay: const Duration(milliseconds: 80),

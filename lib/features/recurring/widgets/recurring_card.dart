@@ -143,12 +143,7 @@ class RecurringCard extends StatelessWidget {
               children: [
                 _MetaChip(icon: Icons.repeat_rounded, label: recurring.frequency.label),
                 const SizedBox(width: AppSpacing.sm),
-                _MetaChip(
-                  icon: Icons.event_outlined,
-                  label: recurring.status == RecurringStatus.completed
-                      ? 'Ended'
-                      : 'Due ${recurring.nextDueDate.toRelativeLabel()}',
-                ),
+                _DueDateChip(recurring: recurring),
                 const Spacer(),
                 StatusChip(status: recurring.status),
               ],
@@ -160,30 +155,73 @@ class RecurringCard extends StatelessWidget {
   }
 }
 
-class _MetaChip extends StatelessWidget {
-  final IconData icon;
-  final String label;
+/// The due-date chip, colored by urgency for an active schedule: overdue
+/// (danger), due within [_dueSoonWindow] (warning), otherwise the same
+/// neutral styling as every other meta chip. Paused/completed schedules
+/// don't have a "live" countdown, so they stay neutral regardless of how
+/// close `nextDueDate` looks.
+class _DueDateChip extends StatelessWidget {
+  static const _dueSoonWindow = Duration(days: 3);
 
-  const _MetaChip({required this.icon, required this.label});
+  final RecurringTransaction recurring;
+
+  const _DueDateChip({required this.recurring});
 
   @override
   Widget build(BuildContext context) {
+    if (recurring.status == RecurringStatus.completed) {
+      return const _MetaChip(icon: Icons.event_outlined, label: 'Ended');
+    }
+
+    final label = 'Due ${recurring.nextDueDate.toRelativeLabel()}';
+    if (recurring.status != RecurringStatus.active) {
+      return _MetaChip(icon: Icons.event_outlined, label: label);
+    }
+
+    final now = DateTime.now();
+    final semantic = context.semanticColors;
+    if (recurring.nextDueDate.isBefore(now)) {
+      return _MetaChip(
+        icon: Icons.error_outline_rounded,
+        label: label,
+        color: semantic.danger,
+      );
+    }
+    if (recurring.nextDueDate.isBefore(now.add(_dueSoonWindow))) {
+      return _MetaChip(
+        icon: Icons.schedule_rounded,
+        label: label,
+        color: semantic.warning,
+      );
+    }
+    return _MetaChip(icon: Icons.event_outlined, label: label);
+  }
+}
+
+class _MetaChip extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color? color;
+
+  const _MetaChip({required this.icon, required this.label, this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    final tint = color ?? context.colors.onSurfaceVariant;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: context.colors.surfaceContainerHighest,
+        color: color?.withValues(alpha: 0.12) ?? context.colors.surfaceContainerHighest,
         borderRadius: AppRadius.radiusSm,
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 12, color: context.colors.onSurfaceVariant),
+          Icon(icon, size: 12, color: tint),
           const SizedBox(width: 4),
           Text(
             label,
-            style: context.textStyles.labelSmall?.copyWith(
-              color: context.colors.onSurfaceVariant,
-            ),
+            style: context.textStyles.labelSmall?.copyWith(color: tint),
           ),
         ],
       ),

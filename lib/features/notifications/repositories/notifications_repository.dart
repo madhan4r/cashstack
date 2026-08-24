@@ -66,6 +66,46 @@ class NotificationsRepository {
       throw mapExceptionToFailure(e.appException);
     }
   }
+
+  /// A category absent from the returned map is enabled by default.
+  Future<Map<String, bool>> getNotificationPreferences() async {
+    try {
+      final response = await _dio.get<Map<String, dynamic>>(
+        '/users/me/notification-preferences',
+      );
+      final apiResponse = ApiResponse.fromJson(
+        response.data!,
+        (json) => (json as Map<String, dynamic>).map(
+          (key, value) => MapEntry(key, value as bool),
+        ),
+      );
+      return apiResponse.data;
+    } on DioException catch (e) {
+      throw mapExceptionToFailure(e.appException);
+    }
+  }
+
+  /// Merges [updates] into the stored preferences — only the categories
+  /// present are changed.
+  Future<Map<String, bool>> updateNotificationPreferences(
+    Map<String, bool> updates,
+  ) async {
+    try {
+      final response = await _dio.patch<Map<String, dynamic>>(
+        '/users/me/notification-preferences',
+        data: {'preferences': updates},
+      );
+      final apiResponse = ApiResponse.fromJson(
+        response.data!,
+        (json) => (json as Map<String, dynamic>).map(
+          (key, value) => MapEntry(key, value as bool),
+        ),
+      );
+      return apiResponse.data;
+    } on DioException catch (e) {
+      throw mapExceptionToFailure(e.appException);
+    }
+  }
 }
 
 final notificationsRepositoryProvider = Provider<NotificationsRepository>((ref) {

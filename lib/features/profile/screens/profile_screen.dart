@@ -133,7 +133,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final avatarLoadFailed = avatarUrl != null && avatarUrl == _failedAvatarUrl;
 
     return Scaffold(
-      appBar: const CashStackAppBar(title: 'Profile', showBackButton: false),
+      appBar: const CashStackAppBar(title: 'Profile'),
       body: ListView(
         padding: const EdgeInsets.all(24),
         children: [
