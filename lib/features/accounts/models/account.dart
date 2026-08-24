@@ -18,6 +18,7 @@ class Account extends Equatable {
   final String? icon;
   final String? description;
   final bool isArchived;
+  final double? lowBalanceThreshold;
 
   /// Who this account belongs to — only interesting when it differs from
   /// the signed-in user, i.e. a household member's account.
@@ -37,6 +38,7 @@ class Account extends Equatable {
     this.icon,
     this.description,
     required this.isArchived,
+    this.lowBalanceThreshold,
     this.ownerId = '',
     this.ownerName = '',
     required this.createdAt,
@@ -56,6 +58,7 @@ class Account extends Equatable {
       icon: json['icon'] as String?,
       description: json['description'] as String?,
       isArchived: json['isArchived'] as bool? ?? false,
+      lowBalanceThreshold: (json['lowBalanceThreshold'] as num?)?.toDouble(),
       ownerId: json['ownerId'] as String? ?? '',
       ownerName: json['ownerName'] as String? ?? '',
       createdAt: DateTime.parse(json['createdAt'] as String),
@@ -75,6 +78,7 @@ class Account extends Equatable {
       icon: icon,
       description: description,
       isArchived: isArchived ?? this.isArchived,
+      lowBalanceThreshold: lowBalanceThreshold,
       ownerId: ownerId,
       ownerName: ownerName,
       createdAt: createdAt,
@@ -94,6 +98,7 @@ class Account extends Equatable {
     icon,
     description,
     isArchived,
+    lowBalanceThreshold,
     ownerId,
     ownerName,
     createdAt,

@@ -7,6 +7,7 @@ class AccountFormData {
   final String currency;
   final double openingBalance;
   final String? description;
+  final double? lowBalanceThreshold;
 
   const AccountFormData({
     required this.name,
@@ -14,6 +15,7 @@ class AccountFormData {
     required this.currency,
     required this.openingBalance,
     this.description,
+    this.lowBalanceThreshold,
   });
 
   Map<String, dynamic> toJson() {
@@ -24,6 +26,7 @@ class AccountFormData {
       'openingBalance': openingBalance,
       if (description != null && description!.trim().isNotEmpty)
         'description': description!.trim(),
+      'lowBalanceThreshold': lowBalanceThreshold,
     };
   }
 }

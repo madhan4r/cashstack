@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../features/auth/providers/auth_controller.dart';
 import '../../features/auth/repositories/auth_repository.dart';
+import '../../features/notifications/providers/notifications_controller.dart';
 import 'notification_service.dart';
 
 /// Registers this device's FCM token with the backend while the user is
@@ -56,6 +57,11 @@ final pushRegistrationProvider = Provider<void>((ref) {
             title: notification.title ?? 'CashStack',
             body: notification.body ?? '',
           );
+      // The backend already persisted this in the notification center (see
+      // PushNotificationService.sendToUser) by the time the push arrives —
+      // refresh so the bell badge/list reflect it without waiting for the
+      // user to happen to revisit the screen.
+      ref.read(notificationsControllerProvider.notifier).refresh();
     });
 
     final settings = await messaging.requestPermission();

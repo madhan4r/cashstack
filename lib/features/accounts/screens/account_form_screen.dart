@@ -28,6 +28,7 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
   late final _nameController = TextEditingController();
   late final _openingBalanceController = TextEditingController();
   late final _descriptionController = TextEditingController();
+  late final _lowBalanceThresholdController = TextEditingController();
   bool _seededFromState = false;
 
   @override
@@ -35,6 +36,7 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
     _nameController.dispose();
     _openingBalanceController.dispose();
     _descriptionController.dispose();
+    _lowBalanceThresholdController.dispose();
     super.dispose();
   }
 
@@ -47,6 +49,11 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
             state.openingBalance! % 1 == 0 ? 0 : 2,
           );
     _descriptionController.text = state.description;
+    _lowBalanceThresholdController.text = state.lowBalanceThreshold == null
+        ? ''
+        : state.lowBalanceThreshold!.toStringAsFixed(
+            state.lowBalanceThreshold! % 1 == 0 ? 0 : 2,
+          );
     _seededFromState = true;
   }
 
@@ -156,6 +163,7 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
               nameController: _nameController,
               openingBalanceController: _openingBalanceController,
               descriptionController: _descriptionController,
+              lowBalanceThresholdController: _lowBalanceThresholdController,
               onSave: () => _handleSave(state.isEditMode),
               onToggleArchive: () =>
                   _handleToggleArchive(_nameController.text, state.isArchived),
@@ -170,6 +178,7 @@ class _FormContent extends ConsumerWidget {
   final TextEditingController nameController;
   final TextEditingController openingBalanceController;
   final TextEditingController descriptionController;
+  final TextEditingController lowBalanceThresholdController;
   final VoidCallback onSave;
   final VoidCallback onToggleArchive;
 
@@ -179,6 +188,7 @@ class _FormContent extends ConsumerWidget {
     required this.nameController,
     required this.openingBalanceController,
     required this.descriptionController,
+    required this.lowBalanceThresholdController,
     required this.onSave,
     required this.onToggleArchive,
   });
@@ -202,6 +212,7 @@ class _FormContent extends ConsumerWidget {
               nameController: nameController,
               openingBalanceController: openingBalanceController,
               descriptionController: descriptionController,
+              lowBalanceThresholdController: lowBalanceThresholdController,
               type: state.type,
               onTypeChanged: controller.setType,
               currency: state.currency,
@@ -224,6 +235,14 @@ class _FormContent extends ConsumerWidget {
                             0,
                       );
                       controller.setDescription(descriptionController.text);
+                      final thresholdText = lowBalanceThresholdController.text
+                          .replaceAll(',', '')
+                          .trim();
+                      controller.setLowBalanceThreshold(
+                        thresholdText.isEmpty
+                            ? null
+                            : double.tryParse(thresholdText),
+                      );
                       onSave();
                     },
             ),

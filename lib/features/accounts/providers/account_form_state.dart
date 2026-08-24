@@ -16,6 +16,7 @@ class AccountFormState {
   final String currency;
   final double? openingBalance;
   final String description;
+  final double? lowBalanceThreshold;
 
   /// The account's current computed balance, captured when an existing
   /// account is loaded. Create/update responses don't include a fresh
@@ -45,6 +46,7 @@ class AccountFormState {
     this.currency = 'INR',
     this.openingBalance,
     this.description = '',
+    this.lowBalanceThreshold,
     this.knownBalance,
     this.isArchived = false,
     this.showValidationErrors = false,
@@ -75,6 +77,7 @@ class AccountFormState {
       currency: account.currency,
       openingBalance: account.openingBalance,
       description: account.description ?? '',
+      lowBalanceThreshold: account.lowBalanceThreshold,
       knownBalance: account.balance,
       isArchived: account.isArchived,
     );
@@ -89,6 +92,8 @@ class AccountFormState {
     String? currency,
     double? openingBalance,
     String? description,
+    double? lowBalanceThreshold,
+    bool clearLowBalanceThreshold = false,
     double? knownBalance,
     bool? isArchived,
     bool? showValidationErrors,
@@ -108,6 +113,9 @@ class AccountFormState {
       currency: currency ?? this.currency,
       openingBalance: openingBalance ?? this.openingBalance,
       description: description ?? this.description,
+      lowBalanceThreshold: clearLowBalanceThreshold
+          ? null
+          : (lowBalanceThreshold ?? this.lowBalanceThreshold),
       knownBalance: knownBalance ?? this.knownBalance,
       isArchived: isArchived ?? this.isArchived,
       showValidationErrors: showValidationErrors ?? this.showValidationErrors,

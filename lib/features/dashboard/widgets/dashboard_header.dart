@@ -1,12 +1,13 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/config/app_config.dart';
 import '../../../core/constants/app_spacing.dart';
-import '../../../core/widgets/feedback/app_toast.dart';
 import '../../../core/extensions/context_extensions.dart';
 import '../../../routes/app_routes.dart';
+import '../../notifications/providers/notifications_controller.dart';
 
 /// Dashboard's top banner: a time-of-day greeting, the user's profile
 /// avatar (tapping it jumps to the Profile tab), and a notifications
@@ -63,9 +64,7 @@ class _DashboardHeaderState extends State<DashboardHeader> {
           ),
         ),
         const SizedBox(width: AppSpacing.sm),
-        _NotificationButton(
-          onPressed: () => AppToast.show(context, 'No new notifications'),
-        ),
+        const _NotificationButton(),
         const SizedBox(width: AppSpacing.sm),
         GestureDetector(
           onTap: () => context.go(AppRoutes.profile),
@@ -98,25 +97,52 @@ class _DashboardHeaderState extends State<DashboardHeader> {
   }
 }
 
-class _NotificationButton extends StatelessWidget {
-  final VoidCallback onPressed;
-
-  const _NotificationButton({required this.onPressed});
+class _NotificationButton extends ConsumerWidget {
+  const _NotificationButton();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final unreadCount = ref.watch(unreadNotificationCountProvider);
+
     return Container(
       decoration: BoxDecoration(
         color: context.colors.surfaceContainerHighest.withValues(alpha: 0.5),
         shape: BoxShape.circle,
       ),
-      child: IconButton(
-        onPressed: onPressed,
-        icon: Icon(
-          Icons.notifications_none_rounded,
-          color: context.colors.onSurface,
-        ),
-        tooltip: 'Notifications',
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          IconButton(
+            onPressed: () => context.push(AppRoutes.notifications),
+            icon: Icon(
+              Icons.notifications_none_rounded,
+              color: context.colors.onSurface,
+            ),
+            tooltip: 'Notifications',
+          ),
+          if (unreadCount > 0)
+            Positioned(
+              right: 6,
+              top: 6,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
+                decoration: BoxDecoration(
+                  color: context.colors.error,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  unreadCount > 9 ? '9+' : '$unreadCount',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: context.colors.onError,
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }

@@ -12,6 +12,7 @@ import '../core/home_widget/home_widget_screen.dart';
 import '../features/accounts/screens/screens.dart';
 import '../features/household/screens/household_screen.dart';
 import '../features/household/screens/pending_invites_screen.dart';
+import '../features/notifications/screens/notifications_screen.dart';
 import '../features/budget/screens/category_budgets_screen.dart';
 import '../features/categories/screens/screens.dart';
 import '../features/dashboard/screens/dashboard_screen.dart';
@@ -161,6 +162,10 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.feedback,
         builder: (context, state) => const FeedbackScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.notifications,
+        builder: (context, state) => const NotificationsScreen(),
       ),
       GoRoute(
         path: AppRoutes.detectedTransactions,

@@ -48,6 +48,7 @@ class AppRoutes {
   static String editRecurring(String recurringId) => '/recurring/$recurringId/edit';
   static const String editRecurringPattern = '/recurring/:id/edit';
 
+  static const String notifications = '/notifications';
   static const String detectedTransactions = '/detected-transactions';
   static const String homeScreenWidgets = '/home-screen-widgets';
 

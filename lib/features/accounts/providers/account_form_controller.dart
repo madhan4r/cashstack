@@ -63,6 +63,12 @@ class AccountFormController extends Notifier<AccountFormState> {
   void setDescription(String description) =>
       state = state.copyWith(description: description);
 
+  void setLowBalanceThreshold(double? lowBalanceThreshold) => state = state
+      .copyWith(
+        lowBalanceThreshold: lowBalanceThreshold,
+        clearLowBalanceThreshold: lowBalanceThreshold == null,
+      );
+
   Future<Result<Account>> submit() async {
     final errors = _validate(state);
     state = state.copyWith(
@@ -85,6 +91,7 @@ class AccountFormController extends Notifier<AccountFormState> {
       currency: state.currency,
       openingBalance: state.openingBalance!,
       description: state.description,
+      lowBalanceThreshold: state.lowBalanceThreshold,
     );
 
     try {
@@ -175,6 +182,9 @@ class AccountFormController extends Notifier<AccountFormState> {
       errors['openingBalance'] = 'Enter an opening balance';
     } else if (s.openingBalance! < 0) {
       errors['openingBalance'] = 'Opening balance cannot be negative';
+    }
+    if (s.lowBalanceThreshold != null && s.lowBalanceThreshold! < 0) {
+      errors['lowBalanceThreshold'] = 'Threshold cannot be negative';
     }
 
     return errors;

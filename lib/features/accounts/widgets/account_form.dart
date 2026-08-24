@@ -17,6 +17,7 @@ class AccountFormBody extends StatelessWidget {
   final TextEditingController nameController;
   final TextEditingController openingBalanceController;
   final TextEditingController descriptionController;
+  final TextEditingController lowBalanceThresholdController;
 
   final AccountType type;
   final ValueChanged<AccountType> onTypeChanged;
@@ -32,6 +33,7 @@ class AccountFormBody extends StatelessWidget {
     required this.nameController,
     required this.openingBalanceController,
     required this.descriptionController,
+    required this.lowBalanceThresholdController,
     required this.type,
     required this.onTypeChanged,
     required this.currency,
@@ -124,6 +126,29 @@ class AccountFormBody extends StatelessWidget {
           maxLines: 3,
           maxLength: 500,
         ),
+        const SizedBox(height: AppSpacing.lg),
+        CurrencyTextField(
+          label: 'Low Balance Alert (optional)',
+          symbol: currencySymbolFor(currency),
+          controller: lowBalanceThresholdController,
+        ),
+        if (_errorFor('lowBalanceThreshold') != null) ...[
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            _errorFor('lowBalanceThreshold')!,
+            style: context.textStyles.bodySmall?.copyWith(
+              color: context.colors.error,
+            ),
+          ),
+        ] else ...[
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            "We'll notify you when this account drops below the amount you set",
+            style: context.textStyles.bodySmall?.copyWith(
+              color: context.colors.onSurfaceVariant,
+            ),
+          ),
+        ],
       ],
     );
   }
