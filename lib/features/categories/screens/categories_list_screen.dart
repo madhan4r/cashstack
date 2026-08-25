@@ -10,6 +10,7 @@ import '../../../core/widgets/misc/scrollable_single_child.dart';
 import '../../../core/widgets/misc/section_header.dart';
 import '../../../core/widgets/navigation/app_bar.dart';
 import '../../../routes/app_routes.dart';
+import '../../auth/providers/preferred_currency_provider.dart';
 import '../models/categories_filter.dart';
 import '../models/category.dart';
 import '../models/category_type.dart';
@@ -42,6 +43,7 @@ class _CategoriesListScreenState extends ConsumerState<CategoriesListScreen> {
     final listState = ref.watch(categoriesListControllerProvider);
     final filter = ref.watch(categoriesFilterProvider);
     final categories = ref.watch(filteredCategoriesProvider);
+    final currencySymbol = ref.watch(preferredCurrencySymbolProvider);
     final hasActiveFilters = filter.type != null || filter.search.isNotEmpty;
 
     return Scaffold(
@@ -108,6 +110,7 @@ class _CategoriesListScreenState extends ConsumerState<CategoriesListScreen> {
                   ),
                 _ => _GroupedCategoryList(
                     categories: categories,
+                    currencySymbol: currencySymbol,
                     onTapCategory: _onTapCategory,
                   ),
               },
@@ -170,9 +173,14 @@ class _FilterChipsRow extends ConsumerWidget {
 
 class _GroupedCategoryList extends StatelessWidget {
   final List<Category> categories;
+  final String currencySymbol;
   final ValueChanged<Category> onTapCategory;
 
-  const _GroupedCategoryList({required this.categories, required this.onTapCategory});
+  const _GroupedCategoryList({
+    required this.categories,
+    required this.currencySymbol,
+    required this.onTapCategory,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -189,7 +197,11 @@ class _GroupedCategoryList extends StatelessWidget {
           for (final category in expense)
             Padding(
               padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-              child: CategoryCard(category: category, onTap: () => onTapCategory(category)),
+              child: CategoryCard(
+                category: category,
+                currencySymbol: currencySymbol,
+                onTap: () => onTapCategory(category),
+              ),
             ),
           const SizedBox(height: AppSpacing.md),
         ],
@@ -199,7 +211,11 @@ class _GroupedCategoryList extends StatelessWidget {
           for (final category in income)
             Padding(
               padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-              child: CategoryCard(category: category, onTap: () => onTapCategory(category)),
+              child: CategoryCard(
+                category: category,
+                currencySymbol: currencySymbol,
+                onTap: () => onTapCategory(category),
+              ),
             ),
         ],
       ],

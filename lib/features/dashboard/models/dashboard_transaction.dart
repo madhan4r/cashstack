@@ -6,6 +6,8 @@ class DashboardTransaction {
   final String id;
   final double amount;
   final TransactionKind kind;
+  final String ownerId;
+  final String? ownerName;
   final String? accountName;
   final String? categoryName;
   final String? categoryIcon;
@@ -18,6 +20,8 @@ class DashboardTransaction {
     required this.id,
     required this.amount,
     required this.kind,
+    this.ownerId = '',
+    this.ownerName,
     this.accountName,
     this.categoryName,
     this.categoryIcon,
@@ -32,6 +36,8 @@ class DashboardTransaction {
       id: json['id'] as String,
       amount: (json['amount'] as num).toDouble(),
       kind: TransactionKind.fromJson(json['type'] as String),
+      ownerId: json['ownerId'] as String? ?? '',
+      ownerName: json['ownerName'] as String?,
       accountName: json['accountName'] as String?,
       categoryName: json['categoryName'] as String?,
       categoryIcon: json['categoryIcon'] as String?,

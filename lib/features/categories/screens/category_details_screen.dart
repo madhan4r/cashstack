@@ -14,6 +14,7 @@ import '../../../core/widgets/misc/section_header.dart';
 import '../../../core/widgets/navigation/app_bar.dart';
 import '../../../routes/app_routes.dart';
 import '../../../services/snackbar_service.dart';
+import '../../auth/providers/preferred_currency_provider.dart';
 import '../../transactions/models/account_ref.dart';
 import '../../transactions/models/category_ref.dart';
 import '../../transactions/providers/reference_data_provider.dart';
@@ -61,6 +62,7 @@ class CategoryDetailsScreen extends ConsumerWidget {
       categoryTransactionsControllerProvider(categoryId),
     );
     final referenceDataAsync = ref.watch(referenceDataProvider);
+    final currencySymbol = ref.watch(preferredCurrencySymbolProvider);
 
     ref.listen(categoryTransactionsControllerProvider(categoryId), (previous, next) {
       final error = next.backgroundError;
@@ -127,6 +129,7 @@ class CategoryDetailsScreen extends ConsumerWidget {
               category: detailsState.category!,
               transactionsState: transactionsState,
               referenceDataAsync: referenceDataAsync,
+              currencySymbol: currencySymbol,
               onLoadMore: () => ref
                   .read(categoryTransactionsControllerProvider(categoryId).notifier)
                   .loadNextPage(),
@@ -141,12 +144,14 @@ class _CategoryDetailsContent extends StatelessWidget {
   final Category category;
   final TransactionsListState transactionsState;
   final AsyncValue<ReferenceData> referenceDataAsync;
+  final String currencySymbol;
   final VoidCallback onLoadMore;
 
   const _CategoryDetailsContent({
     required this.category,
     required this.transactionsState,
     required this.referenceDataAsync,
+    required this.currencySymbol,
     required this.onLoadMore,
   });
 
@@ -194,7 +199,7 @@ class _CategoryDetailsContent extends StatelessWidget {
         const SizedBox(height: AppSpacing.xl),
         const SectionHeader(title: 'Statistics'),
         const SizedBox(height: AppSpacing.sm),
-        CategoryStatsGrid(category: category),
+        CategoryStatsGrid(category: category, currencySymbol: currencySymbol),
         const SizedBox(height: AppSpacing.xl),
         const SectionHeader(title: 'Recent Transactions'),
         const SizedBox(height: AppSpacing.sm),

@@ -33,82 +33,110 @@ class MonthlyTrendChartCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: AppSpacing.lg),
-          SizedBox(
-            height: 180,
-            child: LineChart(
-              LineChartData(
-                minY: 0,
-                maxY: effectiveMaxY,
-                gridData: FlGridData(
-                  drawVerticalLine: false,
-                  horizontalInterval: effectiveMaxY / 4,
-                  getDrawingHorizontalLine: (value) => FlLine(
-                    color: context.colors.outlineVariant.withValues(alpha: 0.4),
-                    strokeWidth: 1,
+          // Isolates the chart's custom painting into its own GPU layer —
+          // same reasoning as BalanceCard's RepaintBoundary — so scrolling
+          // past it recomposites a cached bitmap instead of re-running
+          // fl_chart's paint every frame.
+          RepaintBoundary(
+            child: SizedBox(
+              height: 180,
+              child: LineChart(
+                LineChartData(
+                  minY: 0,
+                  maxY: effectiveMaxY,
+                  gridData: FlGridData(
+                    drawVerticalLine: false,
+                    horizontalInterval: effectiveMaxY / 4,
+                    getDrawingHorizontalLine: (value) => FlLine(
+                      color: context.colors.outlineVariant.withValues(
+                        alpha: 0.4,
+                      ),
+                      strokeWidth: 1,
+                    ),
                   ),
-                ),
-                titlesData: FlTitlesData(
-                  topTitles: const AxisTitles(
-                    sideTitles: SideTitles(showTitles: false),
-                  ),
-                  rightTitles: const AxisTitles(
-                    sideTitles: SideTitles(showTitles: false),
-                  ),
-                  leftTitles: const AxisTitles(
-                    sideTitles: SideTitles(showTitles: false),
-                  ),
-                  bottomTitles: AxisTitles(
-                    sideTitles: SideTitles(
-                      showTitles: true,
-                      reservedSize: 24,
-                      getTitlesWidget: (value, meta) {
-                        final index = value.toInt();
-                        if (index < 0 || index >= points.length) {
-                          return const SizedBox.shrink();
-                        }
-                        return Padding(
-                          padding: const EdgeInsets.only(top: 6),
-                          child: Text(
-                            points[index].shortLabel,
-                            style: context.textStyles.labelSmall?.copyWith(
-                              color: context.colors.onSurfaceVariant,
+                  titlesData: FlTitlesData(
+                    topTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
+                    rightTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
+                    leftTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
+                    bottomTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        reservedSize: 24,
+                        getTitlesWidget: (value, meta) {
+                          final index = value.toInt();
+                          if (index < 0 || index >= points.length) {
+                            return const SizedBox.shrink();
+                          }
+                          return Padding(
+                            padding: const EdgeInsets.only(top: 6),
+                            child: Text(
+                              points[index].shortLabel,
+                              style: context.textStyles.labelSmall?.copyWith(
+                                color: context.colors.onSurfaceVariant,
+                              ),
                             ),
-                          ),
-                        );
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                  borderData: FlBorderData(show: false),
+                  lineTouchData: LineTouchData(
+                    touchTooltipData: LineTouchTooltipData(
+                      getTooltipColor: (_) => context.colors.inverseSurface,
+                      getTooltipItems: (touchedSpots) {
+                        return touchedSpots.map((spot) {
+                          final isIncome = spot.barIndex == 0;
+                          return LineTooltipItem(
+                            spot.y.toStringAsFixed(0),
+                            TextStyle(
+                              color: isIncome
+                                  ? semantic.income
+                                  : semantic.expense,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          );
+                        }).toList();
                       },
                     ),
                   ),
+                  lineBarsData: [
+                    _buildLine(
+                      points
+                          .asMap()
+                          .entries
+                          .map((e) => FlSpot(e.key.toDouble(), e.value.income))
+                          .toList(),
+                      semantic.income,
+                    ),
+                    _buildLine(
+                      points
+                          .asMap()
+                          .entries
+                          .map((e) => FlSpot(e.key.toDouble(), e.value.expense))
+                          .toList(),
+                      semantic.expense,
+                    ),
+                  ],
                 ),
-                borderData: FlBorderData(show: false),
-                lineTouchData: LineTouchData(
-                  touchTooltipData: LineTouchTooltipData(
-                    getTooltipColor: (_) => context.colors.inverseSurface,
-                    getTooltipItems: (touchedSpots) {
-                      return touchedSpots.map((spot) {
-                        final isIncome = spot.barIndex == 0;
-                        return LineTooltipItem(
-                          spot.y.toStringAsFixed(0),
-                          TextStyle(
-                            color: isIncome ? semantic.income : semantic.expense,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        );
-                      }).toList();
-                    },
-                  ),
-                ),
-                lineBarsData: [
-                  _buildLine(
-                    points.asMap().entries.map((e) => FlSpot(e.key.toDouble(), e.value.income)).toList(),
-                    semantic.income,
-                  ),
-                  _buildLine(
-                    points.asMap().entries.map((e) => FlSpot(e.key.toDouble(), e.value.expense)).toList(),
-                    semantic.expense,
-                  ),
-                ],
+                // Not an entrance animation (StaggeredEntrance already
+                // handles that for this whole card) — fl_chart replays this
+                // tween on *every* rebuild of LineChartData, not just when
+                // the underlying points actually change, since a fresh
+                // LineChartData/FlSpot list is built each time regardless of
+                // whether the values differ. Left at fl_chart's ~600ms
+                // default, that meant any dashboard rebuild (pull-to-refresh,
+                // a provider elsewhere in the tree changing) re-triggered a
+                // full repaint-every-frame animation on this chart, which is
+                // what made the whole screen feel slow to render.
+                duration: Duration.zero,
               ),
-              duration: const Duration(milliseconds: 600),
             ),
           ),
         ],
