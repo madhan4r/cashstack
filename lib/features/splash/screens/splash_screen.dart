@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/extensions/context_extensions.dart';
+import '../../../core/performance/shader_warmup.dart';
 import '../../../core/widgets/buttons/app_primary_button.dart';
 import '../../../core/widgets/feedback/circular_loader.dart';
 import '../../../features/auth/providers/auth_controller.dart';
@@ -25,6 +26,9 @@ class SplashScreen extends ConsumerWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              // Invisible — see DashboardShaderWarmUp's own doc for why it's here
+              // rather than on the Dashboard itself.
+              const DashboardShaderWarmUp(),
               ClipRRect(
                 borderRadius: BorderRadius.circular(24),
                 child: Image.asset(
